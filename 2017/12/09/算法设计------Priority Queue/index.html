@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="算法设计,C,数据结构," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Priority Queue 普通队列是一种先进先出（FIFO）的数据结构。在优先队列中，元素被赋予优先级。当访问元素时，具有最高优先级的元素最先删除。优先队列具有最高优先先出（first in，lagest out）的行为特征。  实现方案使用排序和数组可以简单的实现Priority Queue，插入到列表的时间复杂">
+<meta name="keywords" content="算法设计,C,数据结构">
+<meta property="og:type" content="article">
+<meta property="og:title" content="算法设计------Priority_Queue实现">
+<meta property="og:url" content="https://bosskaige.github.io/2017/12/09/算法设计------Priority Queue/index.html">
+<meta property="og:site_name" content="Kai&#39;s Blog">
+<meta property="og:description" content="Priority Queue 普通队列是一种先进先出（FIFO）的数据结构。在优先队列中，元素被赋予优先级。当访问元素时，具有最高优先级的元素最先删除。优先队列具有最高优先先出（first in，lagest out）的行为特征。  实现方案使用排序和数组可以简单的实现Priority Queue，插入到列表的时间复杂度为𝑂（𝑛），排序列表的时间复杂度为𝑂(𝑛log𝑛)。更优的方式是使用">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://bosskaige.github.io/images/binaryTree.png">
+<meta property="og:image" content="https://bosskaige.github.io/images/array_heap.png">
+<meta property="og:updated_time" content="2017-12-09T09:35:23.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="算法设计------Priority_Queue实现">
+<meta name="twitter:description" content="Priority Queue 普通队列是一种先进先出（FIFO）的数据结构。在优先队列中，元素被赋予优先级。当访问元素时，具有最高优先级的元素最先删除。优先队列具有最高优先先出（first in，lagest out）的行为特征。  实现方案使用排序和数组可以简单的实现Priority Queue，插入到列表的时间复杂度为𝑂（𝑛），排序列表的时间复杂度为𝑂(𝑛log𝑛)。更优的方式是使用">
+<meta name="twitter:image" content="https://bosskaige.github.io/images/binaryTree.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://bosskaige.github.io/2017/12/09/算法设计------Priority Queue/"/>
+
+
+
+
+
+  <title>算法设计------Priority_Queue实现 | Kai's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Kai's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://bosskaige.github.io/2017/12/09/算法设计------Priority Queue/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="王凯">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kai's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">算法设计------Priority_Queue实现</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-09T00:00:00+08:00">
+                2017-12-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/算法设计/" itemprop="url" rel="index">
+                    <span itemprop="name">算法设计</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/算法设计/数据结构/" itemprop="url" rel="index">
+                    <span itemprop="name">数据结构</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="Priority-Queue"><a href="#Priority-Queue" class="headerlink" title="Priority Queue"></a>Priority Queue</h2><blockquote>
+<p>普通队列是一种先进先出（FIFO）的数据结构。在优先队列中，元素被赋予优先级。当访问元素时，具有最高优先级的元素最先删除。优先队列具有最高优先先出（first in，lagest out）的行为特征。</p>
+</blockquote>
+<h2 id="实现方案"><a href="#实现方案" class="headerlink" title="实现方案"></a>实现方案</h2><p>使用排序和数组可以简单的实现Priority Queue，插入到列表的时间复杂度为𝑂（𝑛），排序列表的时间复杂度为𝑂(𝑛log𝑛)。更优的方式是使用大顶堆（小顶堆），以大顶堆（小顶堆）实现的Priority Queue的出队、入队时间复杂度均为𝑂(log 𝑛)。</p>
+<a id="more"></a>
+<h2 id="二进制堆"><a href="#二进制堆" class="headerlink" title="二进制堆"></a>二进制堆</h2><pre><code>1. 堆中某个节点的值总是不大于或不小于其父节点的值（分别为大顶堆和小顶堆）。
+2. 堆是一颗完全二叉树。
+</code></pre><p>从二叉树角度来看大顶堆：</p>
+<p><img src="/images/binaryTree.png" style="zoom:50%"></p>
+<p>以数组存储该大顶堆：</p>
+<p><img src="/images/array_heap.png" style="zoom:50%"></p>
+<p>子节点与父节点的关系:</p>
+<pre><code>p_left = p * 2;
+p_right = p * 2 + 1;
+</code></pre><h2 id="调整堆（出队、入队操作）"><a href="#调整堆（出队、入队操作）" class="headerlink" title="调整堆（出队、入队操作）"></a>调整堆（出队、入队操作）</h2><h3 id="入队"><a href="#入队" class="headerlink" title="入队"></a>入队</h3><ol>
+<li>新元素插在树的末尾，如果树的最后一层已满，添加一层。</li>
+<li>如果插入元素打破大顶堆（小顶堆）的结构，与其父节点交换。</li>
+<li>重复第二步直至满足大顶堆（小顶堆）的结构。</li>
+</ol>
+<h5 id="入队时间复杂度：-𝑂-log-𝑛"><a href="#入队时间复杂度：-𝑂-log-𝑛" class="headerlink" title="入队时间复杂度： 𝑂(log 𝑛)"></a>入队时间复杂度： 𝑂(log 𝑛)</h5><h3 id="出队"><a href="#出队" class="headerlink" title="出队"></a>出队</h3><ol>
+<li>交换根节点元素与最后一个元素，删除根节点元素（现在是最后一个元素）。</li>
+<li>如果交换后的根节点打破大顶堆的结构，与其较大的孩子节点交换。</li>
+<li>重复第二部直至满足大顶堆结构。</li>
+</ol>
+<h5 id="出队时间复杂度：𝑂-log-𝑛"><a href="#出队时间复杂度：𝑂-log-𝑛" class="headerlink" title="出队时间复杂度：𝑂(log 𝑛)"></a>出队时间复杂度：𝑂(log 𝑛)</h5><h3 id="堆调整的可视化演示"><a href="#堆调整的可视化演示" class="headerlink" title="堆调整的可视化演示"></a>堆调整的可视化演示</h3><p><a href="https://visualgo.net/en/heap?slide=1" target="_blank" rel="noopener">堆 可视化演示</a></p>
+<h2 id="C语言实现"><a href="#C语言实现" class="headerlink" title="C语言实现"></a>C语言实现</h2><h3 id="h文件"><a href="#h文件" class="headerlink" title=".h文件"></a>.h文件</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &quot;stdbool.h&quot;</span><br><span class="line"></span><br><span class="line">typedef struct priority_Queue_Node&#123;</span><br><span class="line">    int priority;//优先级</span><br><span class="line">    int member;//数据域</span><br><span class="line">&#125;Priority_Queue_Node, * p_Priority_Node;</span><br><span class="line"></span><br><span class="line">typedef struct priority_Queue&#123;</span><br><span class="line">    Priority_Queue_Node * nodeList;</span><br><span class="line">    int length;//已分配内存长度</span><br><span class="line">    int contentLength;//当前内容长度</span><br><span class="line">&#125;Priority_Queue, * p_Priority_Queue;</span><br><span class="line"></span><br><span class="line">void InitPriorityQueue(p_Priority_Queue queue, int n);//初始化</span><br><span class="line">bool Insert(p_Priority_Queue queue, int member,int priority);//入队</span><br><span class="line">bool Empty(p_Priority_Queue queue);//判空</span><br><span class="line">int RemoveTop(p_Priority_Queue queue);//出队</span><br><span class="line">void travelPriorityQueue(p_Priority_Queue queue);//遍历</span><br></pre></td></tr></table></figure>
+<h3 id="c文件"><a href="#c文件" class="headerlink" title=".c文件"></a>.c文件</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br></pre></td><td class="code"><pre><span class="line">#include &quot;Priority_Queue.h&quot;</span><br><span class="line">#include &quot;stdlib.h&quot;</span><br><span class="line">void adjustAfterInsert(p_Priority_Queue queue);</span><br><span class="line">void adjustAfterRemove(p_Priority_Queue queue);</span><br><span class="line">void swap(p_Priority_Node node1,p_Priority_Node node2);</span><br><span class="line"></span><br><span class="line">void InitPriorityQueue(p_Priority_Queue queue, int n)&#123;</span><br><span class="line">    Priority_Queue_Node * nodeList = malloc(sizeof(Priority_Queue_Node) * 2);</span><br><span class="line">    if (nodeList == NULL) &#123;</span><br><span class="line">        printf(&quot;分配内存失败&quot;);</span><br><span class="line">        exit(-1);</span><br><span class="line">    &#125;</span><br><span class="line">    queue -&gt; nodeList = nodeList;</span><br><span class="line">    queue -&gt; length = n;</span><br><span class="line">    queue -&gt; contentLength = 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">bool CheckPriority(p_Priority_Queue queue, int priority)&#123;</span><br><span class="line">    int position = 0;</span><br><span class="line">    bool legal = true;</span><br><span class="line">    while (position &lt; queue -&gt; contentLength) &#123;</span><br><span class="line">        if ((queue -&gt; nodeList + position) -&gt; priority == priority ) &#123;</span><br><span class="line">            printf(&quot;非法优先级&quot;);</span><br><span class="line">            legal = false;</span><br><span class="line">            break;</span><br><span class="line">        &#125;</span><br><span class="line">        position ++;</span><br><span class="line">    &#125;</span><br><span class="line">    return legal;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">bool Insert(p_Priority_Queue queue, int member,int priority)&#123;</span><br><span class="line">    if (!CheckPriority(queue, priority)) &#123;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    if (queue -&gt; length == queue -&gt; contentLength) &#123;</span><br><span class="line">        queue -&gt; length *= 2;</span><br><span class="line">        queue -&gt; nodeList = realloc(queue -&gt; nodeList, sizeof(Priority_Queue_Node) * queue -&gt; length);</span><br><span class="line">        if (NULL == queue -&gt; nodeList) &#123;</span><br><span class="line">            printf(&quot;分配内存失败&quot;);</span><br><span class="line">            return false;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    int contentLength = queue -&gt; contentLength;</span><br><span class="line">    p_Priority_Node node = queue -&gt; nodeList + contentLength;</span><br><span class="line">    node -&gt; member = member;</span><br><span class="line">    node -&gt; priority = priority;</span><br><span class="line">    queue -&gt; contentLength += 1;</span><br><span class="line">    adjustAfterInsert(queue);</span><br><span class="line">    </span><br><span class="line">    printf(&quot;Insert %d with pri %d\n&quot;,member,priority);</span><br><span class="line">    return true;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int RemoveTop(p_Priority_Queue queue)&#123;</span><br><span class="line"></span><br><span class="line">    int return_val;</span><br><span class="line">    if (Empty(queue)) &#123;</span><br><span class="line">        printf(&quot;Queue is empty&quot;);</span><br><span class="line">        exit(-1);</span><br><span class="line">    &#125;else&#123;</span><br><span class="line"></span><br><span class="line">        p_Priority_Node pNode = queue -&gt; nodeList;</span><br><span class="line">        return_val = pNode -&gt; member;</span><br><span class="line">        swap(&amp;(queue -&gt; nodeList)[0], &amp;(queue -&gt; nodeList)[queue -&gt; contentLength - 1]);</span><br><span class="line">        queue -&gt; contentLength -= 1;</span><br><span class="line">        adjustAfterRemove(queue);</span><br><span class="line">        printf(&quot;removeValue %d\n&quot;,return_val);</span><br><span class="line">        return return_val;</span><br><span class="line">    &#125;</span><br><span class="line">    return 1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">bool Empty(p_Priority_Queue queue)&#123;</span><br><span class="line">    if (0 == queue -&gt; contentLength) &#123;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;else&#123;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void travelPriorityQueue(p_Priority_Queue queue)&#123;</span><br><span class="line">    if (Empty(queue)) &#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">    int position = 0;</span><br><span class="line">    while (position &lt; queue -&gt; contentLength) &#123;</span><br><span class="line">        printf(&quot;member --- %d with %d ---- priority\n&quot;,(queue -&gt; nodeList + position) -&gt; member , (queue -&gt; nodeList + position) -&gt; priority );</span><br><span class="line">        position++;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//入队后调整</span><br><span class="line">void adjustAfterInsert(p_Priority_Queue queue)&#123;</span><br><span class="line">    int insertPosition = queue -&gt; contentLength - 1;</span><br><span class="line">    while (insertPosition) &#123;</span><br><span class="line">        int swapPosition = insertPosition / 2;</span><br><span class="line">        p_Priority_Node swapNode = &amp;(queue -&gt; nodeList)[swapPosition];</span><br><span class="line">        p_Priority_Node insertNode = &amp;(queue -&gt; nodeList)[insertPosition];</span><br><span class="line">        if (swapNode -&gt; priority &lt; insertNode -&gt; priority) &#123;</span><br><span class="line">            swap(swapNode, insertNode);</span><br><span class="line">            insertPosition = swapPosition;</span><br><span class="line">        &#125;else&#123;</span><br><span class="line">            break;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 出队后调整</span><br><span class="line">void adjustAfterRemove(p_Priority_Queue queue)&#123;</span><br><span class="line">    int parent = 1;</span><br><span class="line">    while (parent * 2 &lt;= queue -&gt; contentLength) &#123;</span><br><span class="line">        int left = parent * 2;</span><br><span class="line">        int right = (parent * 2 + 1);</span><br><span class="line">        if (right &gt; queue -&gt; contentLength) &#123;</span><br><span class="line">            right = queue -&gt; contentLength;</span><br><span class="line">        &#125;</span><br><span class="line">        p_Priority_Node parentNode = &amp;(queue -&gt; nodeList)[parent - 1];</span><br><span class="line">        p_Priority_Node leftNode = &amp;(queue -&gt; nodeList)[left -1];</span><br><span class="line">        p_Priority_Node rightNode = &amp;(queue -&gt; nodeList)[right -1];</span><br><span class="line">        p_Priority_Node swapNode;</span><br><span class="line">        if (leftNode -&gt; priority &gt;= rightNode -&gt; priority) &#123;</span><br><span class="line">            parent = left;</span><br><span class="line">            swapNode = leftNode;</span><br><span class="line">        &#125;else&#123;</span><br><span class="line">            parent = right;</span><br><span class="line">            swapNode = rightNode;</span><br><span class="line">        &#125;</span><br><span class="line">        if (swapNode -&gt; priority &gt;= parentNode -&gt; priority) &#123;</span><br><span class="line">            swap(parentNode, swapNode);</span><br><span class="line">        &#125;else&#123;</span><br><span class="line">            break;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void swap(p_Priority_Node node1,p_Priority_Node node2)&#123;</span><br><span class="line">    p_Priority_Node tempNode = malloc(sizeof(Priority_Queue_Node));</span><br><span class="line">    </span><br><span class="line">    if (NULL == tempNode) &#123;</span><br><span class="line">        printf(&quot;分配内存失败&quot;);</span><br><span class="line">        exit(-1);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    tempNode -&gt; priority = node1 -&gt; priority;</span><br><span class="line">    tempNode -&gt; member = node1 -&gt; member;</span><br><span class="line">    </span><br><span class="line">    node1 -&gt; member = node2 -&gt; member;</span><br><span class="line">    node1 -&gt; priority = node2 -&gt; priority;</span><br><span class="line">    </span><br><span class="line">    node2 -&gt; priority = tempNode -&gt; priority;</span><br><span class="line">    node2 -&gt; member = tempNode -&gt; member;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="测试代码"><a href="#测试代码" class="headerlink" title="测试代码"></a>测试代码</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">void testPriorityQueue()&#123;</span><br><span class="line">    Priority_Queue queue;</span><br><span class="line">    InitPriorityQueue(&amp;queue, 2);</span><br><span class="line">    </span><br><span class="line">    for (int i = 0; i &lt; 20; i ++) &#123;</span><br><span class="line">        int pr = arc4random() % 100;</span><br><span class="line">        int member = arc4random() % 100;</span><br><span class="line">        Insert(&amp;queue, member, pr);</span><br><span class="line">        printf(&quot;================================================\n&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    printf(&quot;$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n&quot;);</span><br><span class="line">    for (int i = 0; i &lt; 20; i ++) &#123;</span><br><span class="line">        RemoveTop(&amp;queue);</span><br><span class="line">        travelPriorityQueue(&amp;queue);</span><br><span class="line">        printf(&quot;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="备注"><a href="#备注" class="headerlink" title="备注"></a>备注</h2><p>   由于堆调整是不稳定的，同优先级元素出队顺序是不定的，这里不允许插入同优先级元素。</p>
+<p>如果对你有帮助的话，Star✨下一吧！</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/算法设计/" rel="tag"># 算法设计</a>
+          
+            <a href="/tags/C/" rel="tag"># C</a>
+          
+            <a href="/tags/数据结构/" rel="tag"># 数据结构</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/08/算法设计-------队列实现/" rel="next" title="算法设计------队列实现">
+                <i class="fa fa-chevron-left"></i> 算法设计------队列实现
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="王凯" />
+            
+              <p class="site-author-name" itemprop="name">王凯</p>
+              <p class="site-description motion-element" itemprop="description">The shortest answer is doing!</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/BossKaiGe" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:angxian66@163.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://blog.csdn.net/uitguyrff" target="_blank" title="CSDN">
+                    
+                      <i class="fa fa-fw fa-instagram"></i>CSDN</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Priority-Queue"><span class="nav-number">1.</span> <span class="nav-text">Priority Queue</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实现方案"><span class="nav-number">2.</span> <span class="nav-text">实现方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二进制堆"><span class="nav-number">3.</span> <span class="nav-text">二进制堆</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#调整堆（出队、入队操作）"><span class="nav-number">4.</span> <span class="nav-text">调整堆（出队、入队操作）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#入队"><span class="nav-number">4.1.</span> <span class="nav-text">入队</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#入队时间复杂度：-𝑂-log-𝑛"><span class="nav-number">4.1.0.1.</span> <span class="nav-text">入队时间复杂度： 𝑂(log 𝑛)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#出队"><span class="nav-number">4.2.</span> <span class="nav-text">出队</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#出队时间复杂度：𝑂-log-𝑛"><span class="nav-number">4.2.0.1.</span> <span class="nav-text">出队时间复杂度：𝑂(log 𝑛)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#堆调整的可视化演示"><span class="nav-number">4.3.</span> <span class="nav-text">堆调整的可视化演示</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C语言实现"><span class="nav-number">5.</span> <span class="nav-text">C语言实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#h文件"><span class="nav-number">5.1.</span> <span class="nav-text">.h文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#c文件"><span class="nav-number">5.2.</span> <span class="nav-text">.c文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试代码"><span class="nav-number">5.3.</span> <span class="nav-text">测试代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#备注"><span class="nav-number">6.</span> <span class="nav-text">备注</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王凯</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
