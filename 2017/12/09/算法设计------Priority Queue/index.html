@@ -87,13 +87,13 @@
 <meta property="og:site_name" content="Kai&#39;s Blog">
 <meta property="og:description" content="Priority Queue 普通队列是一种先进先出（FIFO）的数据结构。在优先队列中，元素被赋予优先级。当访问元素时，具有最高优先级的元素最先删除。优先队列具有最高优先先出（first in，lagest out）的行为特征。  实现方案使用排序和数组可以简单的实现Priority Queue，插入到列表的时间复杂度为𝑂（𝑛），排序列表的时间复杂度为𝑂(𝑛log𝑛)。更优的方式是使用">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://bosskaige.github.io/images/binaryTree.png">
-<meta property="og:image" content="https://bosskaige.github.io/images/array_heap.png">
-<meta property="og:updated_time" content="2017-12-09T09:35:23.000Z">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/heap.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/array.png">
+<meta property="og:updated_time" content="2017-12-09T10:10:09.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="算法设计------Priority_Queue实现">
 <meta name="twitter:description" content="Priority Queue 普通队列是一种先进先出（FIFO）的数据结构。在优先队列中，元素被赋予优先级。当访问元素时，具有最高优先级的元素最先删除。优先队列具有最高优先先出（first in，lagest out）的行为特征。  实现方案使用排序和数组可以简单的实现Priority Queue，插入到列表的时间复杂度为𝑂（𝑛），排序列表的时间复杂度为𝑂(𝑛log𝑛)。更优的方式是使用">
-<meta name="twitter:image" content="https://bosskaige.github.io/images/binaryTree.png">
+<meta name="twitter:image" content="https://bosskaige.github.io/post_images/heap.png">
 
 
 
@@ -374,9 +374,9 @@
 <h2 id="二进制堆"><a href="#二进制堆" class="headerlink" title="二进制堆"></a>二进制堆</h2><pre><code>1. 堆中某个节点的值总是不大于或不小于其父节点的值（分别为大顶堆和小顶堆）。
 2. 堆是一颗完全二叉树。
 </code></pre><p>从二叉树角度来看大顶堆：</p>
-<p><img src="/images/binaryTree.png" style="zoom:50%"></p>
+<p><img src="/post_images/heap.png" style="zoom:50%"></p>
 <p>以数组存储该大顶堆：</p>
-<p><img src="/images/array_heap.png" style="zoom:50%"></p>
+<p><img src="/post_images/array.png" style="zoom:50%"></p>
 <p>子节点与父节点的关系:</p>
 <pre><code>p_left = p * 2;
 p_right = p * 2 + 1;
@@ -430,8 +430,8 @@ p_right = p * 2 + 1;
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/12/08/算法设计-------队列实现/" rel="next" title="算法设计------队列实现">
-                <i class="fa fa-chevron-left"></i> 算法设计------队列实现
+              <a href="/2017/12/08/算法设计------斐波那契数列/" rel="next" title="算法设计------斐波那契数列">
+                <i class="fa fa-chevron-left"></i> 算法设计------斐波那契数列
               </a>
             
           </div>
