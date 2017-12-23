@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="算法设计,C,数据结构," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="举个栗子给定一个二叉树，找到两个节点NA， NB的最近公共祖先(LCA)。方便理解、比如对于下图:">
+<meta name="keywords" content="算法设计,C,数据结构">
+<meta property="og:type" content="article">
+<meta property="og:title" content="算法设计------Lowest Commen Ancestor">
+<meta property="og:url" content="https://bosskaige.github.io/2017/12/23/算法设计------Lowest Commen Ancestor/index.html">
+<meta property="og:site_name" content="Kai&#39;s Blog">
+<meta property="og:description" content="举个栗子给定一个二叉树，找到两个节点NA， NB的最近公共祖先(LCA)。方便理解、比如对于下图:">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/lca.png">
+<meta property="og:updated_time" content="2017-12-23T07:12:21.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="算法设计------Lowest Commen Ancestor">
+<meta name="twitter:description" content="举个栗子给定一个二叉树，找到两个节点NA， NB的最近公共祖先(LCA)。方便理解、比如对于下图:">
+<meta name="twitter:image" content="https://bosskaige.github.io/post_images/lca.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://bosskaige.github.io/2017/12/23/算法设计------Lowest Commen Ancestor/"/>
+
+
+
+
+
+  <title>算法设计------Lowest Commen Ancestor | Kai's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Kai's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://bosskaige.github.io/2017/12/23/算法设计------Lowest Commen Ancestor/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="王凯">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kai's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">算法设计------Lowest Commen Ancestor</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-23T00:00:00+08:00">
+                2017-12-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/算法设计/" itemprop="url" rel="index">
+                    <span itemprop="name">算法设计</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/算法设计/数据结构/" itemprop="url" rel="index">
+                    <span itemprop="name">数据结构</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="举个栗子"><a href="#举个栗子" class="headerlink" title="举个栗子"></a>举个栗子</h2><p>给定一个二叉树，找到两个节点NA， NB的最近公共祖先(LCA)。<br><br>方便理解、比如对于下图:</p>
+<p><img src="/post_images/lca.png" style="zoom:100%"></p>
+<a id="more"></a>
+<h2 id="Binary-Search-Tree-的LCA"><a href="#Binary-Search-Tree-的LCA" class="headerlink" title="Binary Search Tree 的LCA"></a>Binary Search Tree 的LCA</h2><p>在二叉搜索树中，利用BST属性，我们可以在O（h）时间找到LCA，其中h是树的高度。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">/* 查找n1和n2的公共祖先，该函数假定 n1、n2存在于Binary Search Tree上*/</span><br><span class="line">pLCA_Node lca(pLCA_Node root, int n1, int n2)</span><br><span class="line">&#123;</span><br><span class="line">    while (root != NULL)</span><br><span class="line">    &#123;</span><br><span class="line">        // 如果n1 ,n2都比根小，LCA存在于左子树</span><br><span class="line">        if (root-&gt;member &gt; n1 &amp;&amp; root-&gt;member &gt; n2)</span><br><span class="line">            root = root-&gt;left_Child;</span><br><span class="line">        </span><br><span class="line">        // 如果n1 ,n2都比根小，LCA存在于右子树</span><br><span class="line">        else if (root-&gt;member &lt; n1 &amp;&amp; root-&gt;member &lt; n2)</span><br><span class="line">            root = root-&gt;right_Child;</span><br><span class="line">        </span><br><span class="line">        else break;</span><br><span class="line">    &#125;</span><br><span class="line">    return root;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="普通二叉树的LCA"><a href="#普通二叉树的LCA" class="headerlink" title="普通二叉树的LCA"></a>普通二叉树的LCA</h2><p>普通二叉树节点无特殊规律，无法按上述逻辑实现，对于普通二叉树NA、NB的公共祖先可分为以下三种情况（假定NA、NB存在于二叉树）：</p>
+<ul>
+<li>给定键NA或NB与root匹配，则root为LCA</li>
+<li>NA、NB 分别在root的两边，LCA为root</li>
+<li>NA、NB均位于左子树（或右子树），则LCA位于左子树（或右子树）</li>
+</ul>
+<p>通过单次遍历二叉树查找LCA，时间复杂度为O（n）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">pLCA_Node findLCA(pLCA_Node root , int mem1, int mem2)&#123;</span><br><span class="line">    if (root == NULL) &#123;</span><br><span class="line">        return NULL;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    //如果mem1 或 mem2 与root 匹配，则根为LCA</span><br><span class="line">    if (root -&gt; member == mem1 || root -&gt; member == mem2) &#123;</span><br><span class="line">        return root;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // 在左子树、右子树查找最近公共祖先</span><br><span class="line">    pLCA_Node left_lca = findLCA(root -&gt; left_Child, mem1, mem2);</span><br><span class="line">    pLCA_Node right_lca = findLCA(root -&gt; right_Child, mem1, mem2);</span><br><span class="line"></span><br><span class="line">    //mem1、mem2 分别在root的两边，LCA为root</span><br><span class="line">    if (left_lca &amp;&amp; right_lca) &#123;</span><br><span class="line">        return root;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // LCA位于左子树或右子树</span><br><span class="line">    return left_lca ? left_lca : right_lca;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述实现是建立在NA、NB均存在于二叉树。如果NA、NB中某个值不存在于二叉树会将另一个值作为LCA返回（理想情况下应该返回NSNULL）。我们可以通过传递两个布尔变量v1、v2 来扩展这个这类情况，当树中存在n1时，v1置位true，当树中存在n2时，v2置为true。</p>
+<h2 id="完整实现"><a href="#完整实现" class="headerlink" title="完整实现"></a>完整实现</h2><h3 id="h-文件"><a href="#h-文件" class="headerlink" title=".h 文件"></a>.h 文件</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line"></span><br><span class="line">typedef struct lca_Node&#123;</span><br><span class="line">    struct lca_Node * left_Child;</span><br><span class="line">    struct lca_Node * right_Child;</span><br><span class="line">    int member;</span><br><span class="line">&#125;LCA_Node, * pLCA_Node;</span><br><span class="line"></span><br><span class="line">pLCA_Node findLCA(pLCA_Node root , int mem1, int mem2);</span><br><span class="line">pLCA_Node newLcaNode(int member);</span><br></pre></td></tr></table></figure>
+<h3 id="m-文件"><a href="#m-文件" class="headerlink" title=".m 文件"></a>.m 文件</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">#include &quot;FindLCA.h&quot;</span><br><span class="line">#include &quot;stdlib.h&quot;</span><br><span class="line">#include &quot;stdbool.h&quot;</span><br><span class="line"></span><br><span class="line">pLCA_Node newLcaNode(int member)&#123;</span><br><span class="line">    pLCA_Node temp = malloc(sizeof(LCA_Node));</span><br><span class="line">    temp -&gt; member = member;</span><br><span class="line">    temp -&gt; left_Child = temp -&gt; right_Child = NULL;</span><br><span class="line">    return temp;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">pLCA_Node findLCAUtil(pLCA_Node root , int mem1, int mem2, bool * v1, bool * v2)&#123;</span><br><span class="line">    if (root == NULL) &#123;</span><br><span class="line">        return NULL;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    if (root -&gt; member == mem1) &#123;</span><br><span class="line">        *v1 = true;</span><br><span class="line">        return root;</span><br><span class="line">    &#125;</span><br><span class="line">    if (root -&gt; member == mem2) &#123;</span><br><span class="line">        *v2 = true;</span><br><span class="line">        return root;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    pLCA_Node left_lca = findLCAUtil(root -&gt; left_Child, mem1, mem2, v1, v2);</span><br><span class="line">    pLCA_Node right_lca = findLCAUtil(root -&gt; right_Child, mem1, mem2, v1, v2);</span><br><span class="line">    if (left_lca &amp;&amp; right_lca) &#123;</span><br><span class="line">        return root;</span><br><span class="line">    &#125;</span><br><span class="line">    return left_lca ? left_lca : right_lca;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">bool findKey(pLCA_Node root, int key)&#123;</span><br><span class="line">    if (root == NULL) &#123;</span><br><span class="line">        return false;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    if (root -&gt; member == key || findKey(root -&gt; left_Child, key) || findKey(root -&gt; right_Child, key)) &#123;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">    return false;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">pLCA_Node findLCA(pLCA_Node root , int mem1, int mem2)&#123;</span><br><span class="line">    </span><br><span class="line">    bool v1 = false, v2 = false;</span><br><span class="line">    </span><br><span class="line">    pLCA_Node lca = findLCAUtil(root, mem1, mem2, &amp;v1, &amp;v2);</span><br><span class="line">    </span><br><span class="line">    if ((v1 &amp;&amp; v2) || (v1 &amp;&amp; findKey(root, mem2)) || (v2 &amp;&amp; findKey(root, mem1))) &#123;</span><br><span class="line">        return lca;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    return NULL;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="测试代码"><a href="#测试代码" class="headerlink" title="测试代码"></a>测试代码</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">void testFindLCA()&#123;</span><br><span class="line">//  构造一个上图所示的树</span><br><span class="line">    pLCA_Node root = newLcaNode(1);</span><br><span class="line">    root -&gt; left_Child = newLcaNode(2);</span><br><span class="line">    root -&gt; right_Child = newLcaNode(3);</span><br><span class="line">    root -&gt; left_Child -&gt; left_Child = newLcaNode(4);</span><br><span class="line">    root -&gt; left_Child -&gt; right_Child = newLcaNode(5);</span><br><span class="line">    root -&gt; right_Child -&gt; left_Child = newLcaNode(6);</span><br><span class="line">    root -&gt; right_Child -&gt; right_Child = newLcaNode(7);</span><br><span class="line">    </span><br><span class="line">    pLCA_Node lca = findLCA(root, 4, 5);</span><br><span class="line">    </span><br><span class="line">    if (lca) &#123;</span><br><span class="line">        printf(&quot;LCA(4,5)---%d\n&quot;,lca -&gt; member);</span><br><span class="line">    &#125;else&#123;</span><br><span class="line">        printf(&quot;Keys are not present&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    lca = findLCA(root, 4, 10);</span><br><span class="line">    </span><br><span class="line">    if (lca) &#123;</span><br><span class="line">        printf(&quot;LCA(4,10)---%d\n&quot;,lca -&gt; member);</span><br><span class="line">    &#125;else&#123;</span><br><span class="line">        printf(&quot;Keys are not present&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="执行结果"><a href="#执行结果" class="headerlink" title="执行结果"></a>执行结果</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">LCA(4,5)---2</span><br><span class="line">Keys are not present</span><br></pre></td></tr></table></figure>
+<p>如果对你有帮助的话，Star✨下一吧！</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/算法设计/" rel="tag"># 算法设计</a>
+          
+            <a href="/tags/C/" rel="tag"># C</a>
+          
+            <a href="/tags/数据结构/" rel="tag"># 数据结构</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/17/算法设计------Binary Indexed Tree/" rel="next" title="算法设计------Binary Indexed Tree">
+                <i class="fa fa-chevron-left"></i> 算法设计------Binary Indexed Tree
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="王凯" />
+            
+              <p class="site-author-name" itemprop="name">王凯</p>
+              <p class="site-description motion-element" itemprop="description">The shortest answer is doing!</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/BossKaiGe" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:angxian66@163.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://blog.csdn.net/uitguyrff" target="_blank" title="CSDN">
+                    
+                      <i class="fa fa-fw fa-instagram"></i>CSDN</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#举个栗子"><span class="nav-number">1.</span> <span class="nav-text">举个栗子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Binary-Search-Tree-的LCA"><span class="nav-number">2.</span> <span class="nav-text">Binary Search Tree 的LCA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#普通二叉树的LCA"><span class="nav-number">3.</span> <span class="nav-text">普通二叉树的LCA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#完整实现"><span class="nav-number">4.</span> <span class="nav-text">完整实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#h-文件"><span class="nav-number">4.1.</span> <span class="nav-text">.h 文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#m-文件"><span class="nav-number">4.2.</span> <span class="nav-text">.m 文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试代码"><span class="nav-number">4.3.</span> <span class="nav-text">测试代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#执行结果"><span class="nav-number">4.4.</span> <span class="nav-text">执行结果</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王凯</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
