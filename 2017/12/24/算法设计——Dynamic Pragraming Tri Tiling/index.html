@@ -89,7 +89,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://bosskaige.github.io/post_images/Tri_Tiling.png">
 <meta property="og:image" content="https://bosskaige.github.io/post_images/Tri_Tiling_4.png">
-<meta property="og:updated_time" content="2017-12-24T08:14:07.000Z">
+<meta property="og:updated_time" content="2017-12-24T10:00:20.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="算法设计------Dynamic Pragraming Tri Tiling">
 <meta name="twitter:description" content="问题描述用1 x 2的骨牌放满3 x n的矩形有多少种方法 例如：下面是铺满3 x 12的一个方法">
@@ -372,6 +372,7 @@
 <p><img src="/post_images/Tri_Tiling_4.png" style="zoom:50%"></p>
 <p>据此可得递推方程：<br>dp[n]=3 x dp[n-2]+2 x (dp[n-4]+dp[n-6]+…+dp[2])<br>同理有dp[n-2]=3 x dp[n-4]+2 x (dp[n-6]+dp[n-8]+…+dp[2])<br>两式做差得dp[n]=4 x dp[n-2]-dp[n-4]，之后以dp[0]=1,dp[2]=3为起点递推即可 </p>
 <h2 id="Coding"><a href="#Coding" class="headerlink" title="Coding"></a>Coding</h2><h3 id="算法实现"><a href="#算法实现" class="headerlink" title="算法实现"></a>算法实现</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">int tri_Tiling (int n)&#123;</span><br><span class="line">    if (n == 0) &#123;</span><br><span class="line">        return 1;</span><br><span class="line">    &#125;</span><br><span class="line">    if (n % 2 == 1) &#123;</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line">    if (n == 2) &#123;</span><br><span class="line">        return 3;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    return 4 * tri_Tiling(n - 2) - tri_Tiling(n - 4);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="时间复杂度"><a href="#时间复杂度" class="headerlink" title="时间复杂度"></a>时间复杂度</h4><p>时间复杂度为O(n)</p>
 <h3 id="测试代码"><a href="#测试代码" class="headerlink" title="测试代码"></a>测试代码</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">int tri_Count = tri_Tiling(3);</span><br><span class="line">printf(&quot;tri_Count_3 == %d\n&quot;,tri_Count);</span><br><span class="line">tri_Count = tri_Tiling(8);</span><br><span class="line">printf(&quot;tri_Count_8 == %d\n&quot;,tri_Count);</span><br><span class="line">tri_Count = tri_Tiling(12);</span><br><span class="line">printf(&quot;tri_Count_12 == %d\n&quot;,tri_Count);</span><br></pre></td></tr></table></figure>
 <h3 id="执行结果"><a href="#执行结果" class="headerlink" title="执行结果"></a>执行结果</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tri_Count_3 == 0</span><br><span class="line">tri_Count_8 == 153</span><br><span class="line">tri_Count_12 == 2131</span><br></pre></td></tr></table></figure>
 <h2 id="相关链接"><a href="#相关链接" class="headerlink" title="相关链接"></a>相关链接</h2><p><a href="https://www.geeksforgeeks.org/tiling-problem/" target="_blank" rel="noopener">Tiling Problem</a></p>
@@ -419,6 +420,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/24/算法设计------Dynamic Pragraming Longest Common Subsequence/" rel="prev" title="算法设计------Dynamic Pragraming Longest Common Subsequence">
+                算法设计------Dynamic Pragraming Longest Common Subsequence <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -499,7 +504,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-count">16</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -576,7 +581,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题描述"><span class="nav-number">1.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题分析"><span class="nav-number">2.</span> <span class="nav-text">问题分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Coding"><span class="nav-number">3.</span> <span class="nav-text">Coding</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#算法实现"><span class="nav-number">3.1.</span> <span class="nav-text">算法实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试代码"><span class="nav-number">3.2.</span> <span class="nav-text">测试代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#执行结果"><span class="nav-number">3.3.</span> <span class="nav-text">执行结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关链接"><span class="nav-number">4.</span> <span class="nav-text">相关链接</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题描述"><span class="nav-number">1.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题分析"><span class="nav-number">2.</span> <span class="nav-text">问题分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Coding"><span class="nav-number">3.</span> <span class="nav-text">Coding</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#算法实现"><span class="nav-number">3.1.</span> <span class="nav-text">算法实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#时间复杂度"><span class="nav-number">3.1.1.</span> <span class="nav-text">时间复杂度</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试代码"><span class="nav-number">3.2.</span> <span class="nav-text">测试代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#执行结果"><span class="nav-number">3.3.</span> <span class="nav-text">执行结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关链接"><span class="nav-number">4.</span> <span class="nav-text">相关链接</span></a></li></ol></div>
             
 
           </div>
