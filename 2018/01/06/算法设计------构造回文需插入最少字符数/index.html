@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="问题描述给定字符串 x = x0…n-1,为构造x为回文最少需要插入几个字符。例如：  x: Ab3bd 可以构造 “dAb3bAd” 或 “Adb3bdA” 通过插入两个字符  问题分析设Dij表示构造xi…j为回文需插入的最少字符数。   初始情况： Dii = Di,i-1 = 0   xi = xj Dij =">
+<meta name="description" content="问题描述给定字符串 x = x0…n-1,为构造x为回文最少需要插入几个字符。例如：  x: Ab3bd 可以构造 “dAb3bAd” 或 “Adb3bdA” 通过插入两个字符">
 <meta name="keywords" content="算法设计,C,Dynamic Pragraming">
 <meta property="og:type" content="article">
 <meta property="og:title" content="算法设计------构造回文需插入最少字符数">
-<meta property="og:url" content="https://bosskaige.github.io/2017/01/06/算法设计------构造回文需插入最少字符数/index.html">
+<meta property="og:url" content="https://bosskaige.github.io/2018/01/06/算法设计------构造回文需插入最少字符数/index.html">
 <meta property="og:site_name" content="Kai&#39;s Blog">
-<meta property="og:description" content="问题描述给定字符串 x = x0…n-1,为构造x为回文最少需要插入几个字符。例如：  x: Ab3bd 可以构造 “dAb3bAd” 或 “Adb3bdA” 通过插入两个字符  问题分析设Dij表示构造xi…j为回文需插入的最少字符数。   初始情况： Dii = Di,i-1 = 0   xi = xj Dij = Di + 1,j-1 xi != xj  Dij = min{Di+1,j,D">
+<meta property="og:description" content="问题描述给定字符串 x = x0…n-1,为构造x为回文最少需要插入几个字符。例如：  x: Ab3bd 可以构造 “dAb3bAd” 或 “Adb3bdA” 通过插入两个字符">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-01-06T04:13:30.000Z">
+<meta property="og:updated_time" content="2018-01-06T04:23:57.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="算法设计------构造回文需插入最少字符数">
-<meta name="twitter:description" content="问题描述给定字符串 x = x0…n-1,为构造x为回文最少需要插入几个字符。例如：  x: Ab3bd 可以构造 “dAb3bAd” 或 “Adb3bdA” 通过插入两个字符  问题分析设Dij表示构造xi…j为回文需插入的最少字符数。   初始情况： Dii = Di,i-1 = 0   xi = xj Dij = Di + 1,j-1 xi != xj  Dij = min{Di+1,j,D">
+<meta name="twitter:description" content="问题描述给定字符串 x = x0…n-1,为构造x为回文最少需要插入几个字符。例如：  x: Ab3bd 可以构造 “dAb3bAd” 或 “Adb3bdA” 通过插入两个字符">
 
 
 
@@ -120,7 +120,7 @@
 
 
 
-  <link rel="canonical" href="https://bosskaige.github.io/2017/01/06/算法设计------构造回文需插入最少字符数/"/>
+  <link rel="canonical" href="https://bosskaige.github.io/2018/01/06/算法设计------构造回文需插入最少字符数/"/>
 
 
 
@@ -263,7 +263,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bosskaige.github.io/2017/01/06/算法设计------构造回文需插入最少字符数/">
+    <link itemprop="mainEntityOfPage" href="https://bosskaige.github.io/2018/01/06/算法设计------构造回文需插入最少字符数/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="王凯">
@@ -292,8 +292,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-01-06T00:00:00+08:00">
-                2017-01-06
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-06T00:00:00+08:00">
+                2018-01-06
               </time>
             
 
@@ -357,6 +357,7 @@
 <li>x: Ab3bd</li>
 <li>可以构造 “dAb3bAd” 或 “Adb3bdA” 通过插入两个字符</li>
 </ul>
+<a id="more"></a>
 <h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>设D<font size="1">ij</font>表示构造x<font size="1">i…j</font>为回文需插入的最少字符数。 </p>
 <ul>
 <li>初始情况：<br> D<font size="1">ii</font> = D<font size="1">i,i-1</font> = 0  </li>
@@ -404,15 +405,15 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2017/12/24/算法设计——Dynamic Pragraming Tri Tiling/" rel="next" title="算法设计------Dynamic Pragraming Tri Tiling">
+                <i class="fa fa-chevron-left"></i> 算法设计------Dynamic Pragraming Tri Tiling
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/12/03/算法设计------计算a的n次方/" rel="prev" title="算法设计------计算a的n次方">
-                算法设计------计算a的n次方 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
