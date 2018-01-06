@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="算法设计——Dynamic Pragraming 1-dimensional 举个栗子 问题：给定n，求 将n 表达为1，3，4的和的写法数量例如 n = 5 , 答案是：65 = 1 + 1 + 1 + 1 + 15 = 1 + 1 + 3 5 = 1 + 3 + 15 = 3 + 1 + 15 = 1 + 4 5 ">
+<meta name="description" content="问题描述给定字符串 x = x0…n-1,为构造x为回文最少需要插入几个字符。例如：  x: Ab3bd 可以构造 “dAb3bAd” 或 “Adb3bdA” 通过插入两个字符  问题分析设Dij表示构造xi…j为回文需插入的最少字符数。   初始情况： Dii = Di,i-1 = 0   xi = xj Dij =">
 <meta name="keywords" content="算法设计,C,Dynamic Pragraming">
 <meta property="og:type" content="article">
-<meta property="og:title" content="算法设计------Dynamic Pragraming 1-dimensional">
-<meta property="og:url" content="https://bosskaige.github.io/2017/12/23/算法设计------Dynamic Pragraming 1-dimensional/index.html">
+<meta property="og:title" content="算法设计------构造回文需插入最少字符数">
+<meta property="og:url" content="https://bosskaige.github.io/2017/01/06/算法设计------构造回文需插入最少字符数/index.html">
 <meta property="og:site_name" content="Kai&#39;s Blog">
-<meta property="og:description" content="算法设计——Dynamic Pragraming 1-dimensional 举个栗子 问题：给定n，求 将n 表达为1，3，4的和的写法数量例如 n = 5 , 答案是：65 = 1 + 1 + 1 + 1 + 15 = 1 + 1 + 3 5 = 1 + 3 + 15 = 3 + 1 + 15 = 1 + 4 5 = 4 + 1">
+<meta property="og:description" content="问题描述给定字符串 x = x0…n-1,为构造x为回文最少需要插入几个字符。例如：  x: Ab3bd 可以构造 “dAb3bAd” 或 “Adb3bdA” 通过插入两个字符  问题分析设Dij表示构造xi…j为回文需插入的最少字符数。   初始情况： Dii = Di,i-1 = 0   xi = xj Dij = Di + 1,j-1 xi != xj  Dij = min{Di+1,j,D">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-12-24T07:57:09.000Z">
+<meta property="og:updated_time" content="2018-01-06T04:13:30.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="算法设计------Dynamic Pragraming 1-dimensional">
-<meta name="twitter:description" content="算法设计——Dynamic Pragraming 1-dimensional 举个栗子 问题：给定n，求 将n 表达为1，3，4的和的写法数量例如 n = 5 , 答案是：65 = 1 + 1 + 1 + 1 + 15 = 1 + 1 + 3 5 = 1 + 3 + 15 = 3 + 1 + 15 = 1 + 4 5 = 4 + 1">
+<meta name="twitter:title" content="算法设计------构造回文需插入最少字符数">
+<meta name="twitter:description" content="问题描述给定字符串 x = x0…n-1,为构造x为回文最少需要插入几个字符。例如：  x: Ab3bd 可以构造 “dAb3bAd” 或 “Adb3bdA” 通过插入两个字符  问题分析设Dij表示构造xi…j为回文需插入的最少字符数。   初始情况： Dii = Di,i-1 = 0   xi = xj Dij = Di + 1,j-1 xi != xj  Dij = min{Di+1,j,D">
 
 
 
@@ -120,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="https://bosskaige.github.io/2017/12/23/算法设计------Dynamic Pragraming 1-dimensional/"/>
+  <link rel="canonical" href="https://bosskaige.github.io/2017/01/06/算法设计------构造回文需插入最少字符数/"/>
 
 
 
 
 
-  <title>算法设计------Dynamic Pragraming 1-dimensional | Kai's Blog</title>
+  <title>算法设计------构造回文需插入最少字符数 | Kai's Blog</title>
   
 
 
@@ -263,7 +263,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bosskaige.github.io/2017/12/23/算法设计------Dynamic Pragraming 1-dimensional/">
+    <link itemprop="mainEntityOfPage" href="https://bosskaige.github.io/2017/01/06/算法设计------构造回文需插入最少字符数/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="王凯">
@@ -280,7 +280,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">算法设计------Dynamic Pragraming 1-dimensional</h1>
+          <h1 class="post-title" itemprop="name headline">算法设计------构造回文需插入最少字符数</h1>
         
 
         <div class="post-meta">
@@ -292,8 +292,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-23T00:00:00+08:00">
-                2017-12-23
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-01-06T00:00:00+08:00">
+                2017-01-06
               </time>
             
 
@@ -352,21 +352,23 @@
       
 
       
-        <p>算法设计——Dynamic Pragraming 1-dimensional</p>
-<h2 id="举个栗子"><a href="#举个栗子" class="headerlink" title="举个栗子"></a>举个栗子</h2><blockquote>
-<p>问题：给定n，求 将n 表达为1，3，4的和的写法数量<br><br>例如 n = 5 , 答案是：6<br><br>5 = 1 + 1 + 1 + 1 + 1<br><br>5 = 1 + 1 + 3 <br><br>5 = 1 + 3 + 1<br><br>5 = 3 + 1 + 1<br><br>5 = 1 + 4 <br><br>5 = 4 + 1<br></p>
-</blockquote>
-<a id="more"></a>
-<h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><p> 以Dn表示，将n表达为1，3，4的和的数量。<br><br> 假定n = x1 + x2 + · · · + xm<br><br> 如果xm = 1,其他项的总和为n-1<br><br> 则，以xm = 1结尾的和的数目等于 Dn-1<br><br> 以此类推的xm = 3 , xm = 4 分别为 Dn-3,Dn-4</p>
-<h3 id="公式"><a href="#公式" class="headerlink" title="公式"></a>公式</h3><p>从上述分析中可得到公式<br></p>
+        <h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>给定字符串 x = x<font size="1">0…n-1</font>,为构造x为回文最少需要插入几个字符。<br>例如：</p>
 <ul>
-<li>D0 = 1;<br></li>
-<li>Dn = Dn−1 + Dn−3 + Dn−4;</li>
+<li>x: Ab3bd</li>
+<li>可以构造 “dAb3bAd” 或 “Adb3bdA” 通过插入两个字符</li>
 </ul>
-<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><h3 id="算法实现"><a href="#算法实现" class="headerlink" title="算法实现"></a>算法实现</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">int count (int * arr, int m , int n)&#123;</span><br><span class="line">    </span><br><span class="line">    if (n == 0) &#123;</span><br><span class="line">        return 1;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    if (n &lt; 0) &#123;</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    int counts = 0;</span><br><span class="line">    </span><br><span class="line">    for (int i = 0; i &lt; m; i ++) &#123;</span><br><span class="line">        counts += count(arr, m , n - arr[i]);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    return counts;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="测试代码"><a href="#测试代码" class="headerlink" title="测试代码"></a>测试代码</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">int array[] = &#123;1,3,4&#125;;</span><br><span class="line">int count_5 = count(array, 3, 5);</span><br><span class="line">printf(&quot;count_5 == %d&quot;,count_5);</span><br></pre></td></tr></table></figure>
-<h3 id="执行结果"><a href="#执行结果" class="headerlink" title="执行结果"></a>执行结果</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">count_5 == 6</span><br></pre></td></tr></table></figure>
-<h2 id="相关链接"><a href="#相关链接" class="headerlink" title="相关链接"></a>相关链接</h2><p>以下链接给出了在不关心元素位置时该问题的解<br><br><a href="https://www.geeksforgeeks.org/dynamic-programming-set-7-coin-change/" target="_blank" rel="noopener">Dynamic Programming | Set 7 (Coin Change)</a></p>
+<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><p>设D<font size="1">ij</font>表示构造x<font size="1">i…j</font>为回文需插入的最少字符数。 </p>
+<ul>
+<li>初始情况：<br> D<font size="1">ii</font> = D<font size="1">i,i-1</font> = 0  </li>
+<li>x<font size="1">i</font> = x<font size="1">j</font><br> D<font size="1">ij</font> = D<font size="1">i + 1,j-1</font></li>
+<li>x<font size="1">i</font> != x<font size="1">j</font><br>  D<font size="1">ij</font> = min{D<font size="1">i+1,j</font>,D<font size="1">i,j-1</font>} + 1 </li>
+</ul>
+<h2 id="Coding"><a href="#Coding" class="headerlink" title="Coding"></a>Coding</h2><h3 id="递归实现"><a href="#递归实现" class="headerlink" title="递归实现"></a>递归实现</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">int count_for_dailog(char * x, int i , int j)</span><br><span class="line">&#123;</span><br><span class="line">    if(i == j)&#123;</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line">    if(x[i] == x[j])&#123;</span><br><span class="line">        return count_for_dailog(x, i + 1, j - 1);</span><br><span class="line">    &#125;else&#123;</span><br><span class="line">        return 1 + MIN(count_for_dailog(x, i + 1, j), count_for_dailog(x, i, j - 1));</span><br><span class="line">    &#125;</span><br><span class="line">    return 1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="时间复杂度"><a href="#时间复杂度" class="headerlink" title="时间复杂度"></a>时间复杂度</h4><p>递归实现的时间复杂度为2^n ,最坏情况为，x内所有字符无重复。</p>
+<h3 id="动态规划法"><a href="#动态规划法" class="headerlink" title="动态规划法"></a>动态规划法</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">int count_for_dailog(char * x , int n)&#123;</span><br><span class="line">    int count[n][n];</span><br><span class="line">    //count[i][i]/count[i][i-1] == 0</span><br><span class="line">    for (int i = 1; i &lt; n; i ++) &#123;</span><br><span class="line">        count[i][i] = 0;</span><br><span class="line">        count[i][i - 1] = 0;</span><br><span class="line">    &#125;</span><br><span class="line">    count[0][0] = 0;</span><br><span class="line">    //间隙由大到小</span><br><span class="line">    for (int t = 1; t &lt; n; t ++) &#123;</span><br><span class="line">        for (int i = 0 , j = t; j &lt; n; j ++ , i ++) &#123;</span><br><span class="line">            if (x[i] == x[j]) &#123;</span><br><span class="line">                count[i][j] = count[i + 1][j - 1];</span><br><span class="line">            &#125;else&#123;</span><br><span class="line">                count[i][j] = MIN(count[i + 1][j], count[i][j - 1]) + 1;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return count[0][n - 1];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="时间复杂度-1"><a href="#时间复杂度-1" class="headerlink" title="时间复杂度"></a>时间复杂度</h4><p>递归实现的时间复杂度为n^2。</p>
+<h3 id="测试代码"><a href="#测试代码" class="headerlink" title="测试代码"></a>测试代码</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">char * x = &quot;Ab3bd&quot;;</span><br><span class="line">int count = count_for_dailog(x, 5);</span><br><span class="line">printf(&quot;Ab3bd length = %d&quot;,count);</span><br></pre></td></tr></table></figure>
+<h3 id="Output"><a href="#Output" class="headerlink" title="Output"></a>Output</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Ab3bd length = 2</span><br></pre></td></tr></table></figure>
 <p>如果对你有帮助的话，Star✨下一吧！</p>
 
       
@@ -402,18 +404,14 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/12/23/算法设计------Lowest Commen Ancestor/" rel="next" title="算法设计------Lowest Commen Ancestor">
-                <i class="fa fa-chevron-left"></i> 算法设计------Lowest Commen Ancestor
-              </a>
-            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/12/24/算法设计——Dynamic Pragraming Tri Tiling/" rel="prev" title="算法设计------Dynamic Pragraming Tri Tiling">
-                算法设计------Dynamic Pragraming Tri Tiling <i class="fa fa-chevron-right"></i>
+              <a href="/2017/12/03/算法设计------计算a的n次方/" rel="prev" title="算法设计------计算a的n次方">
+                算法设计------计算a的n次方 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -572,7 +570,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#举个栗子"><span class="nav-number">1.</span> <span class="nav-text">举个栗子</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#分析"><span class="nav-number">1.1.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#公式"><span class="nav-number">1.2.</span> <span class="nav-text">公式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实现"><span class="nav-number">2.</span> <span class="nav-text">实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#算法实现"><span class="nav-number">2.1.</span> <span class="nav-text">算法实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试代码"><span class="nav-number">2.2.</span> <span class="nav-text">测试代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#执行结果"><span class="nav-number">2.3.</span> <span class="nav-text">执行结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关链接"><span class="nav-number">3.</span> <span class="nav-text">相关链接</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题描述"><span class="nav-number">1.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题分析"><span class="nav-number">2.</span> <span class="nav-text">问题分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Coding"><span class="nav-number">3.</span> <span class="nav-text">Coding</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#递归实现"><span class="nav-number">3.1.</span> <span class="nav-text">递归实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#时间复杂度"><span class="nav-number">3.1.1.</span> <span class="nav-text">时间复杂度</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#动态规划法"><span class="nav-number">3.2.</span> <span class="nav-text">动态规划法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#时间复杂度-1"><span class="nav-number">3.2.1.</span> <span class="nav-text">时间复杂度</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试代码"><span class="nav-number">3.3.</span> <span class="nav-text">测试代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Output"><span class="nav-number">3.4.</span> <span class="nav-text">Output</span></a></li></ol></li></ol></div>
             
 
           </div>
