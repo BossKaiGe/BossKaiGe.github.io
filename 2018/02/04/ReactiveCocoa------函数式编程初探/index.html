@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="ReactiveCocoa," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="编程范式函数式编程是一种编程范式，我们常见的编程范式有命令式编程、函数式编程、逻辑式编程，常见的面向对象编程是一种命令式编程。   命令式编程 命令式编程是面向计算机硬件的抽象，有变量（对应存储单元），赋值语句（获取，存储指令），表达式（内存引用和算术运算）和控制语句（跳转指令），命令式程序就是一个冯诺依曼的指令序列。">
+<meta name="keywords" content="ReactiveCocoa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ReactiveCocoa------函数式编程初探">
+<meta property="og:url" content="https://bosskaige.github.io/2018/02/04/ReactiveCocoa------函数式编程初探/index.html">
+<meta property="og:site_name" content="Kai&#39;s Blog">
+<meta property="og:description" content="编程范式函数式编程是一种编程范式，我们常见的编程范式有命令式编程、函数式编程、逻辑式编程，常见的面向对象编程是一种命令式编程。   命令式编程 命令式编程是面向计算机硬件的抽象，有变量（对应存储单元），赋值语句（获取，存储指令），表达式（内存引用和算术运算）和控制语句（跳转指令），命令式程序就是一个冯诺依曼的指令序列。    函数式编程（FP） 函数式编程是面向数学的抽象， 将计算描述为一种表达式">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-02-04T05:42:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ReactiveCocoa------函数式编程初探">
+<meta name="twitter:description" content="编程范式函数式编程是一种编程范式，我们常见的编程范式有命令式编程、函数式编程、逻辑式编程，常见的面向对象编程是一种命令式编程。   命令式编程 命令式编程是面向计算机硬件的抽象，有变量（对应存储单元），赋值语句（获取，存储指令），表达式（内存引用和算术运算）和控制语句（跳转指令），命令式程序就是一个冯诺依曼的指令序列。    函数式编程（FP） 函数式编程是面向数学的抽象， 将计算描述为一种表达式">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://bosskaige.github.io/2018/02/04/ReactiveCocoa------函数式编程初探/"/>
+
+
+
+
+
+  <title>ReactiveCocoa------函数式编程初探 | Kai's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Kai's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://bosskaige.github.io/2018/02/04/ReactiveCocoa------函数式编程初探/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="王凯">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kai's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ReactiveCocoa------函数式编程初探</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-04T00:00:00+08:00">
+                2018-02-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ReactiveCocoa/" itemprop="url" rel="index">
+                    <span itemprop="name">ReactiveCocoa</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="编程范式"><a href="#编程范式" class="headerlink" title="编程范式"></a>编程范式</h1><p>函数式编程是一种编程范式，我们常见的编程范式有命令式编程、函数式编程、逻辑式编程，常见的面向对象编程是一种命令式编程。  </p>
+<h2 id="命令式编程"><a href="#命令式编程" class="headerlink" title="命令式编程"></a>命令式编程</h2><blockquote>
+<p>命令式编程是面向计算机硬件的抽象，有变量（对应存储单元），赋值语句（获取，存储指令），表达式（内存引用和算术运算）和控制语句（跳转指令），命令式程序就是一个冯诺依曼的指令序列。  </p>
+</blockquote>
+<h2 id="函数式编程（FP）"><a href="#函数式编程（FP）" class="headerlink" title="函数式编程（FP）"></a>函数式编程（FP）</h2><blockquote>
+<p>函数式编程是面向数学的抽象， 将计算描述为一种表达式求值， 函数式程序就是一个表达式。  </p>
+</blockquote>
+<p>函数式编程中的函数这个术语不是指计算机中的函数，而是指数学中的函数，即自变量的映射。也就是说一个函数的值仅决定于函数参数的值，不依赖于其他状态。比如sqrt(x)函数计算x的平方根，只要x不变，不论什么时候调用，调用几次，值都是不变的。</p>
+<p>由于函数式编程是面向数学的抽象，更接近人的语言。函数式编程更关注结果，相对的命令式编程关注解决问题的步骤。使用函数式编程，代码会比较简洁，也容易被</p>
+<a id="more"></a>
+<h1 id="函数式编程的本质"><a href="#函数式编程的本质" class="headerlink" title="函数式编程的本质"></a>函数式编程的本质</h1><h2 id="一等公民"><a href="#一等公民" class="headerlink" title="一等公民"></a>一等公民</h2><p>函数式编程中，函数与其他数据类型一样，处于平等地位，可以赋值给其他变量，也可以作为参数，传入另一个函数，或者作为别的函数的返回值。  </p>
+<h2 id="高阶函数"><a href="#高阶函数" class="headerlink" title="高阶函数"></a>高阶函数</h2><p>函数式编程中高阶函数是至少满足下列一个条件的函数：</p>
+<ul>
+<li>接受一个或多个函数作为输入</li>
+<li>输出一个函数</li>
+</ul>
+<p>高阶函数范例：<br>这是一个Python script的例子，其中函式g()有一引数以及回传一函数.这个例子会打印100 ( g(f,7)= (7+3)×(7+3) ).</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">def f(x):</span><br><span class="line">    return x + 3</span><br><span class="line"></span><br><span class="line">def g(function, x):</span><br><span class="line">    return function(x) * function(x)</span><br><span class="line"></span><br><span class="line">print g(f, 7)</span><br></pre></td></tr></table></figure>
+<p>范例代码来自于：<a href="https://zh.wikipedia.org/wiki/%E9%AB%98%E9%98%B6%E5%87%BD%E6%95%B0" target="_blank" rel="noopener">维基百科</a></p>
+<h2 id="不修改状态"><a href="#不修改状态" class="headerlink" title="不修改状态"></a>不修改状态</h2><blockquote>
+<p>不变性是函数式编程的基石，面向对象的编程通过封装可变动的部分来构造能够让人读懂的代码，函数式编程则是通过最大程度地减少可变动的部分来构造出可让人读懂的代码。</p>
+</blockquote>
+<p>函数式编程语言中的变量不是命令式编程语言中的变量，即存储状态的单元，而是代数中的变量，即一个值的名称。变量的值是不可变的，意味着状态不能保存在变量中。函数式编程使用参数保存状态，最好的例子就是递归。<br>由于命令式编程语言也可以通过类似于函数指针的方式来实现高阶函数，函数式编程的优势主要是不可变性带来的。没有可变状态，函数就是引用透明、没有副作用的，也是线程安全的。</p>
+<h3 id="引用透明"><a href="#引用透明" class="headerlink" title="引用透明"></a>引用透明</h3><p>引用透明，指的是函数的运行不依赖于外部变量或“状态”，只依赖于输入的参数，即如果提供同样的输入，那么函数总是返回同样的结果。</p>
+<h3 id="无“副作用”"><a href="#无“副作用”" class="headerlink" title="无“副作用”"></a>无“副作用”</h3><p>副作用，指的是函数内部与外部互动，产生预算以外的其他结果。（最典型的情况是修改全局变量的值）。<br>函数式编程强调无“副作用”，意味着函数要保持独立，所有功能就是计算返回一个新的值，没有其他行为，即，纯函数。</p>
+<h3 id="更易调试"><a href="#更易调试" class="headerlink" title="更易调试"></a>更易调试</h3><p>函数不依赖外部状态也不修改外部状态，函数调用的结果不依赖调用的时间和位置，这样写的代码更容易进行推理，不容易出错。这使得单元测试和调试都更容易。</p>
+<h3 id="易于并发编程"><a href="#易于并发编程" class="headerlink" title="易于并发编程"></a>易于并发编程</h3><p>不可变性带来的另一个好处是：函数式编程不需要考虑”死锁”（deadlock），因为它不修改变量，所以根本不存在”锁”线程的问题。不必担心一个线程的数据，被另一个线程修改，所以可以很放心地把工作分摊到多个线程，部署”并发编程”（concurrency）。<br>除此之外，就算某个函数式程序本身只是单线程的，编译器也可以将其优化成可以在多CPU上运行的并发程序。以下面程序为例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">String s1 = somewhatLongOperation1();</span><br><span class="line">String s2 = somewhatLongOperation2();</span><br><span class="line">String s3 = concatenate(s1, s2);</span><br></pre></td></tr></table></figure>
+<p>由于s1和s2互不干扰，不会修改变量，谁先执行是无所谓的，所以可以放心地增加线程，把它们分配在两个线程上完成。其他类型的语言就做不到这一点，因为s1可能会修改系统状态，而s2可能会用到这些状态，所以必须保证s2在s1之后运行，自然也就不能部署到其他线程上了。</p>
+<p>多核CPU是将来的潮流，所以函数式编程的这个特性非常重要。</p>
+<h2 id="只用“表达式”，不用“语句”"><a href="#只用“表达式”，不用“语句”" class="headerlink" title="只用“表达式”，不用“语句”"></a>只用“表达式”，不用“语句”</h2><blockquote>
+<p>严格意义上的函数式编程意味着不适用可变的变量，赋值，循环和其他命令式控制结构进行编程。</p>
+</blockquote>
+<p>“表达式”是一个单纯的运算过程，总是有返回值；“语句”是执行某种操作，没有返回值。函数式编程要求，只使用表达式，不使用语句。也就是说，每一步都是单纯的运算，而且都有返回值。  </p>
+<p>函数式编程的如条件语句、循环语句也不是命令式编程语言中的控制语句，而是函数的语法糖，比如在Scala语言中，if else不是语句而是三元运算符，是有返回值的。</p>
+<h2 id="惰性求值"><a href="#惰性求值" class="headerlink" title="惰性求值"></a>惰性求值</h2><blockquote>
+<p>惰性求值（尽可能延迟表达式求值），表达式不会在它被绑定到变量之后就立即求值，而是在该值被取用的时候求值。 </p>
+</blockquote>
+<p>由于函数是引用透明的以及函数式编程不像命令式编程那样关注执行步骤，这就为系统提供了优化函数式程序的空间，如惰性求值。惰性求值使得代码具备了巨大的优化潜能。支持惰性求值的编译器会像数学家看待代数表达式那样看待函数式程序：抵消相同项从而避免执行无谓的代码，安排代码执行顺序从而实现更高的执行效率甚至减少错误。  </p>
+<p>惰性求值有如下有点：</p>
+<ul>
+<li>首先，你可以用它们来创建无限序列这样一种数据类型。因为直到需要时才会计算值，这样就可以使用惰性集合模拟无限序列。例如存储一个Fibonacci数列数字的列表。</li>
+<li>第二，减少了存储空间。因为在真正需要时才会发生计算。所以，节约了不必要的存储空间。</li>
+<li>第三，减少计算量，产生更高效的代码。因为在真正需要时才会发生计算。例如，寻找数组中第一个符合某个条件的值。</li>
+</ul>
+<h1 id="Continuation-Passing-Style-CPS"><a href="#Continuation-Passing-Style-CPS" class="headerlink" title="Continuation Passing Style (CPS)"></a>Continuation Passing Style (CPS)</h1><h2 id="惰性求值的不足"><a href="#惰性求值的不足" class="headerlink" title="惰性求值的不足"></a>惰性求值的不足</h2><p>惰性求值当然也有其缺点。其中最大的一个就是，嗯，惰性。现实生活中很多问题还是需要严格求值、严格的执行顺序的。比如下面例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">System.out.println(&quot;Please enter your name&quot;);</span><br><span class="line">System.in.readLine();</span><br></pre></td></tr></table></figure>
+<p>由于这两行代码并不存在依赖关系，在惰性语言中没人能保证第一行会在第二行之前执行！这也就意味着我们不能处理IO，不能调用系统函数做任何事情，也就是说不能和外界交互了！<br>函数式编程中我们可以通过Continuation Passing Style 来保证代码按一定的顺序执行。</p>
+<h2 id="CPS"><a href="#CPS" class="headerlink" title="CPS"></a>CPS</h2><p>CPS把函数调用完之后接下来要执行的代码通过闭包包裹并作为函数参数调用要执行的函数。方便理解我们先看一个例子</p>
+<h3 id="举个栗子"><a href="#举个栗子" class="headerlink" title="举个栗子"></a>举个栗子</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">int i = add(5, 10);</span><br><span class="line">int j = square(i);</span><br></pre></td></tr></table></figure>
+<p>add这个函数将返回15然后这个值会赋给i，这也是add被调用的地方。接下来i的值又会被用于调用square。请注意支持惰性求值的编译器不能打乱这段代码的执行顺序，因为第二个函数的执行依赖于第一个函数的执行结果。这段代码可以用CPS技术重写，这样一来add的返回值就不是传递给其调用者，而是直接传到square里去了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int j = add(5, 10, square);</span><br></pre></td></tr></table></figure>
+<p>在上例中，add多了一个参数：一个函数，add必须在完成自己的计算后，调用这个函数并把结果传给它。</p>
+<p>同样我们以CPS技术重写上述IO代码，编译器就必须顺序执行了，因为重写后的代码建立了依赖关系：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">System.out.println(&quot;Please enter your name: &quot;, System.in.readLine);</span><br></pre></td></tr></table></figure>
+<h3 id="CPS-amp-传统函数调用"><a href="#CPS-amp-传统函数调用" class="headerlink" title="CPS &amp; 传统函数调用"></a>CPS &amp; 传统函数调用</h3><h4 id="传统函数调用"><a href="#传统函数调用" class="headerlink" title="传统函数调用"></a>传统函数调用</h4><p>传统函数调用的程序需要额外的函数调用栈才能运行。  </p>
+<p>栈里面存放的是参数还有一个供函数运行结束后返回的程序指针，以支持函数返回后程序的继续运行。</p>
+<h4 id="CPS风格函数调用"><a href="#CPS风格函数调用" class="headerlink" title="CPS风格函数调用"></a>CPS风格函数调用</h4><p>用CPS风格写出来的程序不需要栈，但是每次调用函数的时候都会要多加一个参数。  </p>
+<p>在这里完全没有函数需要做传统意义上的“返回”操作，函数执行完后仅需要接着调用另外一个函数就可以了。也完全不需要保留原来的参数：因为这种程序里的函数都不返回，所以它们不会被用第二次！</p>
+<p>在CPS风格下的函数式编程，函数就是一个管道（pipe）。这头进去一个值另一头出来一个新的值并进入下一个管道，没有其他作用。</p>
+<h1 id="相关链接"><a href="#相关链接" class="headerlink" title="相关链接"></a>相关链接</h1><p><a href="http://www.defmacro.org/2006/06/19/fp.html" target="_blank" rel="noopener">Functional Programming For The Rest of Us</a>  </p>
+<p><a href="https://www.zhihu.com/question/28292740" target="_blank" rel="noopener">什么是函数式编程思维</a></p>
+<p>如果对你有帮助的话，Star✨下一吧！</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ReactiveCocoa/" rel="tag"># ReactiveCocoa</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/13/算法设计------Game of Nim/" rel="next" title="算法设计------Game of Nim">
+                <i class="fa fa-chevron-left"></i> 算法设计------Game of Nim
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="王凯" />
+            
+              <p class="site-author-name" itemprop="name">王凯</p>
+              <p class="site-description motion-element" itemprop="description">The shortest answer is doing!</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/BossKaiGe" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:angxian66@163.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://blog.csdn.net/uitguyrff" target="_blank" title="CSDN">
+                    
+                      <i class="fa fa-fw fa-instagram"></i>CSDN</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#编程范式"><span class="nav-number">1.</span> <span class="nav-text">编程范式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#命令式编程"><span class="nav-number">1.1.</span> <span class="nav-text">命令式编程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#函数式编程（FP）"><span class="nav-number">1.2.</span> <span class="nav-text">函数式编程（FP）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#函数式编程的本质"><span class="nav-number">2.</span> <span class="nav-text">函数式编程的本质</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#一等公民"><span class="nav-number">2.1.</span> <span class="nav-text">一等公民</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#高阶函数"><span class="nav-number">2.2.</span> <span class="nav-text">高阶函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不修改状态"><span class="nav-number">2.3.</span> <span class="nav-text">不修改状态</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#引用透明"><span class="nav-number">2.3.1.</span> <span class="nav-text">引用透明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#无“副作用”"><span class="nav-number">2.3.2.</span> <span class="nav-text">无“副作用”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更易调试"><span class="nav-number">2.3.3.</span> <span class="nav-text">更易调试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#易于并发编程"><span class="nav-number">2.3.4.</span> <span class="nav-text">易于并发编程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#只用“表达式”，不用“语句”"><span class="nav-number">2.4.</span> <span class="nav-text">只用“表达式”，不用“语句”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#惰性求值"><span class="nav-number">2.5.</span> <span class="nav-text">惰性求值</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Continuation-Passing-Style-CPS"><span class="nav-number">3.</span> <span class="nav-text">Continuation Passing Style (CPS)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#惰性求值的不足"><span class="nav-number">3.1.</span> <span class="nav-text">惰性求值的不足</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CPS"><span class="nav-number">3.2.</span> <span class="nav-text">CPS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#举个栗子"><span class="nav-number">3.2.1.</span> <span class="nav-text">举个栗子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CPS-amp-传统函数调用"><span class="nav-number">3.2.2.</span> <span class="nav-text">CPS & 传统函数调用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#传统函数调用"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">传统函数调用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CPS风格函数调用"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">CPS风格函数调用</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#相关链接"><span class="nav-number">4.</span> <span class="nav-text">相关链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王凯</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
