@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="ReactiveCocoa," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="简介ReactiveCocoa是一个将函数响应式编程范例带入Objective-C的开源库。由Josh Abernathy和Justin Spahr-Summers在对GitHub for Mac的开发过程中产生的副产物。RAC富含cocoa框架多种组件，提供基于时间变化的数据流的组合和变换。 函数响应式编程函数响应式">
+<meta name="keywords" content="ReactiveCocoa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ReactiveCocoa------ReactiveCocoa简介">
+<meta property="og:url" content="https://bosskaige.github.io/2018/02/05/ReactiveCocoa------ReactiveCocoa简介/index.html">
+<meta property="og:site_name" content="Kai&#39;s Blog">
+<meta property="og:description" content="简介ReactiveCocoa是一个将函数响应式编程范例带入Objective-C的开源库。由Josh Abernathy和Justin Spahr-Summers在对GitHub for Mac的开发过程中产生的副产物。RAC富含cocoa框架多种组件，提供基于时间变化的数据流的组合和变换。 函数响应式编程函数响应式编程是思考软件将输入转化为输出在时间上的持续过程的一种方式。它糅合了函数式编程和">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/frp.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/Click_Stream.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/stream_1.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/stream_2.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/stream_operation.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/stream_merge.png">
+<meta property="og:updated_time" content="2018-02-06T05:11:58.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ReactiveCocoa------ReactiveCocoa简介">
+<meta name="twitter:description" content="简介ReactiveCocoa是一个将函数响应式编程范例带入Objective-C的开源库。由Josh Abernathy和Justin Spahr-Summers在对GitHub for Mac的开发过程中产生的副产物。RAC富含cocoa框架多种组件，提供基于时间变化的数据流的组合和变换。 函数响应式编程函数响应式编程是思考软件将输入转化为输出在时间上的持续过程的一种方式。它糅合了函数式编程和">
+<meta name="twitter:image" content="https://bosskaige.github.io/post_images/frp.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://bosskaige.github.io/2018/02/05/ReactiveCocoa------ReactiveCocoa简介/"/>
+
+
+
+
+
+  <title>ReactiveCocoa------ReactiveCocoa简介 | Kai's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Kai's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://bosskaige.github.io/2018/02/05/ReactiveCocoa------ReactiveCocoa简介/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="王凯">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kai's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ReactiveCocoa------ReactiveCocoa简介</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-05T00:00:00+08:00">
+                2018-02-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ReactiveCocoa/" itemprop="url" rel="index">
+                    <span itemprop="name">ReactiveCocoa</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p><a href="https://github.com/ReactiveCocoa/ReactiveCocoa" target="_blank" rel="noopener">ReactiveCocoa</a>是一个将函数响应式编程范例带入Objective-C的开源库。由<a href="https://github.com/joshaber" target="_blank" rel="noopener">Josh Abernathy</a>和<a href="https://github.com/jspahrsummers" target="_blank" rel="noopener">Justin Spahr-Summers</a>在对<a href="https://mac.github.com" target="_blank" rel="noopener">GitHub for Mac</a>的开发过程中产生的副产物。RAC富含cocoa框架多种组件，提供基于时间变化的数据流的组合和变换。</p>
+<h2 id="函数响应式编程"><a href="#函数响应式编程" class="headerlink" title="函数响应式编程"></a>函数响应式编程</h2><p>函数响应式编程是思考软件将输入转化为输出在时间上的持续过程的一种方式。它糅合了函数式编程和响应式编程的特点，满足函数式编程的一些特性，将时间轴上的离散事件通过响应式编程的数据流向下传播的一种编程范式。</p>
+<p><img src="/post_images/frp.png" style="zoom:100%"></p>
+<a id="more"></a>
+<p>先来看一下什么是函数式编程/响应式编程。</p>
+<h2 id="函数式编程（FP）"><a href="#函数式编程（FP）" class="headerlink" title="函数式编程（FP）"></a>函数式编程（FP）</h2><p>函数式编程是一种编程范式，它将电脑运算视为数学上的函数计算。函数编程语言最重要的基础是λ演算（lambda calculus），而且λ演算的函数可以接受函数当作输入（参数）和输出（返回值）。</p>
+<p>在之前的<a href="https://bosskaige.github.io/2018/02/04/ReactiveCocoa------%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E5%88%9D%E6%8E%A2/">一篇文章</a>里对FP做了更详尽的剖析，这里就不多做解读。（强烈建议阅读继续阅读之前阅读该篇文章）。</p>
+<h2 id="响应式编程-RP"><a href="#响应式编程-RP" class="headerlink" title="响应式编程 (RP)"></a>响应式编程 (RP)</h2><p>响应式编程是一种面向数据流和变化传播的编程范式。这意味着可以在编程语言中很方便地表达静态或动态数据流，而相关计算模型会自动将变化的值通过数据流进行传播。</p>
+<h3 id="举个栗子"><a href="#举个栗子" class="headerlink" title="举个栗子"></a>举个栗子</h3><blockquote>
+<p>命令式编程环境中<br>a ＝ b ＋ c<br>赋值之后b或c的值变化后，a的值不会跟着变化<br>而在响应式编程中，a的值会随着b或c的更新而更新。</p>
+</blockquote>
+<p>Excel就是响应式编程的另一个例子。对数据进行求和或求均值操作，包含公式结果的单元格的值会根据其他单元格的值的变化而变化。<br>iOS开发中的Autolayout也是响应式编程的一个例子。当父View的位置发生变化，根据相互之间的关系Constraint，子View的frame也会随之变化。</p>
+<h2 id="为什么使用FRP"><a href="#为什么使用FRP" class="headerlink" title="为什么使用FRP"></a>为什么使用FRP</h2><p>函数式响应编程提高了代码抽象层次，所以我们可以只关注定义了业务逻辑的那些相互依赖的事件，而非纠结于大量的实现细节。FRP的代码往往会更加简明。  </p>
+<p>特别是在开发现在这些有着大量与数据事件相关的 UI events 的高互动性 Webapps、手机 apps 的时候，FRP 的优势就更加明显。10年前，网页的交互就只是提交一个很长的表单到后端，而在前端只产生简单的渲染。Apps 就表现得更加的实时了：修改一个表单域就能自动地把修改后的值保存到后端，为一些内容”点赞”时，会实时的反应到其它在线用户那里等等。  </p>
+<p>现在的 Apps 有着大量各种各样的实时 Events，以给用户提供一个交互性较高的体验。我们需要工具去应对这个变化，而函数响应式编程就是一个答案。</p>
+<h3 id="举个栗子-1"><a href="#举个栗子-1" class="headerlink" title="举个栗子"></a>举个栗子</h3><p>示例引用于：<a href="https://zhuanlan.zhihu.com/p/27678951" target="_blank" rel="noopener">响应式编程介绍</a>  </p>
+<p>假设我们想要得到一个包含”双击”事件的Stream。为了使它更有趣，假设我们想要这个Stream要同时考虑三击，或更加宽泛，连击。想象一下在传统的命令式编程中应该怎样实现。我敢打赌代码会像一团乱麻，并且会使用一些变量保存状态，同时也有一些计算时间间隔的代码。</p>
+<p>而在响应式编程中，这个功能的实现就非常简单。事实上，这逻辑只有四行代码。但现在我们不管这些代码。用图表的方式思考是理解怎样构建Stream的最好方法。  </p>
+<p><img src="/post_images/Click_Stream.png" style="zoom:100%"> </p>
+<p>灰色的方框是用来转换 Stream 函数的。</p>
+<ul>
+<li>首先，简而言之，我们把连续 250 ms 内的 Click 都积累到一个列表中（就是 buffer(stream.throttle(250ms) 做的事),结果是一个列表的 Stream。</li>
+<li>然后我们使用 map() 把每个列表映射为一个整数，即它的长度。</li>
+<li>最终，我们使用 filter(x &gt;= 2) 把整数 1 给过滤掉。就这样，3 个操作就生成了我们想要的 Stream。</li>
+<li>然后我们就可以订阅(“监听”)这个 Stream，并以我们所希望的方式作出反应。  </li>
+</ul>
+<p>我希望你能感受到这个示例的优美之处。这个示例只是冰山一角：你可以把同样的操作应用到不同种类的 Stream 上，例如，一个 API 响应的 Stream；另一方面，还有很多其它可用的函数。</p>
+<h2 id="基于时间变化的数据流"><a href="#基于时间变化的数据流" class="headerlink" title="基于时间变化的数据流"></a>基于时间变化的数据流</h2><p>前面提到，RAC提供基于时间变化的数据流的组合和变化，那么什么是基于时间变化的数据流？</p>
+<h3 id="连续数据流-amp-离散数据流"><a href="#连续数据流-amp-离散数据流" class="headerlink" title="连续数据流 &amp; 离散数据流"></a>连续数据流 &amp; 离散数据流</h3><p>数组就是一个最简单的数据流，数组内的值是连续的。而基于时间变化的数据流在一个事件范围内以离散形式存在。如鼠标的点击事件，我们将点击鼠标的事件采集起来就能够得到一个基于时间变化的数据流。如图：<br><img src="/post_images/stream_1.png" style="zoom:100%"> </p>
+<h3 id="多维数组-amp-多维数据流"><a href="#多维数组-amp-多维数据流" class="headerlink" title="多维数组 &amp; 多维数据流"></a>多维数组 &amp; 多维数据流</h3><p>C语言中数组内的元素可以是数组形成多维数组。相似的数据流内元素也可以是一个数据流形成多维数据流，如图：<br><img src="/post_images/stream_2.png" style="zoom:100%"> </p>
+<h3 id="数据流的操作"><a href="#数据流的操作" class="headerlink" title="数据流的操作"></a>数据流的操作</h3><p>RAC提供了对数据流的组合和变换，我们可以对数据流进行一定的操作得到新的流如：</p>
+<ul>
+<li>对值操作得到新的流</li>
+<li>对值的数量进行操作得到新的流</li>
+<li>对维度操作得到新的流</li>
+<li>对时间间隔进行操作得到新的流</li>
+</ul>
+<p><img src="/post_images/stream_operation.png" style="zoom:100%"> </p>
+<p>除此之外我们还可以对多个流进行合并、变换等操作</p>
+<p><img src="/post_images/stream_merge.png" style="zoom:100%"> </p>
+<h2 id="RAC的核心组件"><a href="#RAC的核心组件" class="headerlink" title="RAC的核心组件"></a>RAC的核心组件</h2><p>这里对RAC的核心组件做简要介绍，在后续的学习过程中会做更深入整理</p>
+<h3 id="RACSteam"><a href="#RACSteam" class="headerlink" title="RACSteam"></a>RACSteam</h3><p>RACSteam是RAC对数据流的抽象，提供了一些抽象的接口，其功能主要体现在其两个子类RACSignal（离散数据流）和RACSequence（连续数据流）。</p>
+<p>我们从两个角度分析一个RACSignal 和 RACSequence</p>
+<h4 id="Data-vs-Event"><a href="#Data-vs-Event" class="headerlink" title="Data vs Event"></a>Data vs Event</h4><p>RACSequence：处理的是数据，表示一个序列，里面存放的是一系列的数据，类似数组。<br>RACSignal：处理的是事件，值事件、错误事件、终止事件。</p>
+<h4 id="pullDriver-vs-pushDriver"><a href="#pullDriver-vs-pushDriver" class="headerlink" title="pullDriver vs pushDriver"></a>pullDriver vs pushDriver</h4><p>RACSignal的数据驱动类型是pushDriver;那么什么是pushDriver？</p>
+<ul>
+<li>从值的创建角度：pushDriver意味着信号的值在创建时没有被定义，并可能在稍后的时间里产生信号的值。例如：网络请求或任何用户输入。</li>
+<li>从值的传递角度：每当产生新的信号都会，信号源就会给订阅者发送数据。对于数据调取者是被动接受的。    </li>
+</ul>
+<p>RACSequence的数据驱动类型是pullDriver;那么什么是pullDriver？</p>
+<ul>
+<li>从值的创建角度：pullDriver意味着信号的值在创建的时候就被定义。例如：数组里的值。</li>
+<li>从值的传递角度：任何时间想要拿到数据调取者都可以从数据流里拉取数据。整个时间控制掌握在调取者手中。</li>
+</ul>
+<p>pushDriver可以理解为看电视，pullDriver可以理解为看书。</p>
+<h3 id="RACSubscriber"><a href="#RACSubscriber" class="headerlink" title="RACSubscriber"></a>RACSubscriber</h3><p>RACSubscriber对象是RACSignal的订阅者，负责处理RACSignal传出的数据。RACSubscriber对象初始化的时候回传入的nextBlock、 errorBlock、completeBlock分别处理RACSignal的值事件、错误事件、终止事件。</p>
+<h3 id="RACDisposal"><a href="#RACDisposal" class="headerlink" title="RACDisposal"></a>RACDisposal</h3><p>RACSubscriber在对事件进行订阅时会返回RACDisposal对象，可以通过RACDisposal来终止对信号的订阅。</p>
+<h3 id="RACScheduler"><a href="#RACScheduler" class="headerlink" title="RACScheduler"></a>RACScheduler</h3><p>RACScheduler底层是RAC对GCD的封装，是RAC中负责任务调度的调度器。  RACScheduler通过对GCD封装让并发编程与RAC高度整合。使RAC的使用者更畅快的沉浸在FRP的世界里。</p>
+<h2 id="相关链接"><a href="#相关链接" class="headerlink" title="相关链接"></a>相关链接</h2><p><a href="https://zhuanlan.zhihu.com/p/27678951" target="_blank" rel="noopener">响应式编程介绍</a><br><a href="https://www.zhihu.com/question/26079335/answer/32084850" target="_blank" rel="noopener">函数式响应型编程(Functional Reactive Programming)会在什么问题上有优势?</a><br><a href="https://stackoverflow.com/questions/28952900/what-is-the-difference-between-racsequence-and-racsignal" target="_blank" rel="noopener">What is the difference between RACSequence and RACSignal
+</a></p>
+<p>如果对你有帮助的话，Star✨下一吧！</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ReactiveCocoa/" rel="tag"># ReactiveCocoa</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/04/ReactiveCocoa------函数式编程初探/" rel="next" title="ReactiveCocoa------函数式编程初探">
+                <i class="fa fa-chevron-left"></i> ReactiveCocoa------函数式编程初探
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="王凯" />
+            
+              <p class="site-author-name" itemprop="name">王凯</p>
+              <p class="site-description motion-element" itemprop="description">The shortest answer is doing!</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/BossKaiGe" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:angxian66@163.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://blog.csdn.net/uitguyrff" target="_blank" title="CSDN">
+                    
+                      <i class="fa fa-fw fa-instagram"></i>CSDN</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#函数响应式编程"><span class="nav-number">2.</span> <span class="nav-text">函数响应式编程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#函数式编程（FP）"><span class="nav-number">3.</span> <span class="nav-text">函数式编程（FP）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#响应式编程-RP"><span class="nav-number">4.</span> <span class="nav-text">响应式编程 (RP)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#举个栗子"><span class="nav-number">4.1.</span> <span class="nav-text">举个栗子</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么使用FRP"><span class="nav-number">5.</span> <span class="nav-text">为什么使用FRP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#举个栗子-1"><span class="nav-number">5.1.</span> <span class="nav-text">举个栗子</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基于时间变化的数据流"><span class="nav-number">6.</span> <span class="nav-text">基于时间变化的数据流</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#连续数据流-amp-离散数据流"><span class="nav-number">6.1.</span> <span class="nav-text">连续数据流 & 离散数据流</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多维数组-amp-多维数据流"><span class="nav-number">6.2.</span> <span class="nav-text">多维数组 & 多维数据流</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据流的操作"><span class="nav-number">6.3.</span> <span class="nav-text">数据流的操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAC的核心组件"><span class="nav-number">7.</span> <span class="nav-text">RAC的核心组件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RACSteam"><span class="nav-number">7.1.</span> <span class="nav-text">RACSteam</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Data-vs-Event"><span class="nav-number">7.1.1.</span> <span class="nav-text">Data vs Event</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pullDriver-vs-pushDriver"><span class="nav-number">7.1.2.</span> <span class="nav-text">pullDriver vs pushDriver</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RACSubscriber"><span class="nav-number">7.2.</span> <span class="nav-text">RACSubscriber</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RACDisposal"><span class="nav-number">7.3.</span> <span class="nav-text">RACDisposal</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RACScheduler"><span class="nav-number">7.4.</span> <span class="nav-text">RACScheduler</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关链接"><span class="nav-number">8.</span> <span class="nav-text">相关链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王凯</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
