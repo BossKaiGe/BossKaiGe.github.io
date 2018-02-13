@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="ReactiveCocoa," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引言在之前的一篇Post中对函数响应式编程和RAC做了简单剖析,强烈建议没看过的同学猛戳链接。   ReactiveCocoa的核心是RACSignal类代表的信号。信号会产生一个事件流，事件有三种类型next、completed、error，一个信号源可以发送任意数量的next时间，直到该信号结束（completed">
+<meta name="keywords" content="ReactiveCocoa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ReactiveCocoa------ReactiveCocoa操作详解">
+<meta property="og:url" content="https://bosskaige.github.io/2018/02/13/ ReactiveCocoa------ReactiveCocoa操作详解/index.html">
+<meta property="og:site_name" content="Kai&#39;s Blog">
+<meta property="og:description" content="引言在之前的一篇Post中对函数响应式编程和RAC做了简单剖析,强烈建议没看过的同学猛戳链接。   ReactiveCocoa的核心是RACSignal类代表的信号。信号会产生一个事件流，事件有三种类型next、completed、error，一个信号源可以发送任意数量的next时间，直到该信号结束（completed）或因错误（error）而关闭。通过对信号的订阅可以获得不同事件的回调。使用这个">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/stream_operation.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/Map.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/MapReplace.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/ReduceEach.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/ReduceApply.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/Not.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/and.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/Filter.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/ignore.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/DistinctUntilChanged.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/take.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/takeUntilBlock.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/skipUntilBlock.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/skipWhileBlock.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/Any-faild.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/any-success.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/startWith.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/repeat_no_error-completed.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/repeat_send_error.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/repeat_send_completed.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/retry.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/collect.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/ScanWithStart-reduce-.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/Aggregate.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/throttle.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/Concat.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/Merge.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/Zip.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/CombineLatest.png">
+<meta property="og:updated_time" content="2018-02-13T09:33:32.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ReactiveCocoa------ReactiveCocoa操作详解">
+<meta name="twitter:description" content="引言在之前的一篇Post中对函数响应式编程和RAC做了简单剖析,强烈建议没看过的同学猛戳链接。   ReactiveCocoa的核心是RACSignal类代表的信号。信号会产生一个事件流，事件有三种类型next、completed、error，一个信号源可以发送任意数量的next时间，直到该信号结束（completed）或因错误（error）而关闭。通过对信号的订阅可以获得不同事件的回调。使用这个">
+<meta name="twitter:image" content="https://bosskaige.github.io/post_images/stream_operation.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://bosskaige.github.io/2018/02/13/ ReactiveCocoa------ReactiveCocoa操作详解/"/>
+
+
+
+
+
+  <title>ReactiveCocoa------ReactiveCocoa操作详解 | Kai's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Kai's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://bosskaige.github.io/2018/02/13/ ReactiveCocoa------ReactiveCocoa操作详解/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="王凯">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kai's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ReactiveCocoa------ReactiveCocoa操作详解</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-13T00:00:00+08:00">
+                2018-02-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ReactiveCocoa/" itemprop="url" rel="index">
+                    <span itemprop="name">ReactiveCocoa</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>在之前的一篇<a href="https://bosskaige.github.io/2018/02/05/ReactiveCocoa------ReactiveCocoa%E7%AE%80%E4%BB%8B/">Post</a>中对函数响应式编程和RAC做了简单剖析,强烈建议没看过的同学猛戳链接。  </p>
+<p>ReactiveCocoa的核心是RACSignal类代表的信号。信号会产生一个事件流，事件有三种类型next、completed、error，一个信号源可以发送任意数量的next时间，直到该信号结束（completed）或因错误（error）而关闭。通过对信号的订阅可以获得不同事件的回调。使用这个简单的事件流模型，通过对信号的变换、组合操作，我们可以处理日常iOS开发中的按钮点击、网络请求响应、KVO或用户位置变化等各种事件类型。  </p>
+<p>本篇我们会围绕RACSignal的基本使用及各类操作做详细探究。</p>
+<a id="more"></a>
+<h2 id="RACSignal的创建"><a href="#RACSignal的创建" class="headerlink" title="RACSignal的创建"></a>RACSignal的创建</h2><p>RAC中我们可以通过以下几种方式获得一个信号。</p>
+<h3 id="单元信号"><a href="#单元信号" class="headerlink" title="单元信号"></a>单元信号</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">RACSignal * signal1 = [RACSignal return:@&quot;some Value&quot;];</span><br><span class="line">   RACSignal * signal2 = [RACSignal error:[NSError new]];</span><br><span class="line">   RACSignal * signal3 = [RACSignal empty];</span><br><span class="line">   RACSignal * signal4 = [RACSignal never];</span><br></pre></td></tr></table></figure>
+<h3 id="动态信号"><a href="#动态信号" class="headerlink" title="动态信号"></a>动态信号</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">RACSignal * signal5 = [RACSignal createSignal:^RACDisposable *(id&lt;RACSubscriber&gt; subscriber) &#123;</span><br><span class="line">       [subscriber sendNext:@1];</span><br><span class="line">       [subscriber sendNext:@2];</span><br><span class="line">       [subscriber sendError:[NSError new]];</span><br><span class="line">       [subscriber sendCompleted];</span><br><span class="line">       return [RACDisposable disposableWithBlock:^&#123;</span><br><span class="line">       &#125;];</span><br><span class="line">   &#125;];</span><br></pre></td></tr></table></figure>
+<h3 id="Cocoa桥接"><a href="#Cocoa桥接" class="headerlink" title="Cocoa桥接"></a>Cocoa桥接</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">UIButton  * btn = [UIButton new];</span><br><span class="line">   RACSignal * signal6 = [btn rac_signalForSelector:@selector(setFrame:)];</span><br><span class="line">   RACSignal * signal7 = [btn rac_signalForControlEvents:(UIControlEventTouchUpInside)];</span><br><span class="line">   RACSignal * signal8 = [btn rac_willDeallocSignal];</span><br><span class="line">   RACSignal * signal9 = RACObserve(btn, backgroundColor);</span><br></pre></td></tr></table></figure>
+<h3 id="信号变换"><a href="#信号变换" class="headerlink" title="信号变换"></a>信号变换</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">RACSignal * signal10 = [signal1 map:^id(NSString * value) &#123;</span><br><span class="line">      return [value substringFromIndex:1];</span><br><span class="line">  &#125;];</span><br></pre></td></tr></table></figure>
+<h3 id="序列转换"><a href="#序列转换" class="headerlink" title="序列转换"></a>序列转换</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">RACSequence * sequence = [RACSequence return:@1];</span><br><span class="line">   RACSignal * signal11 = sequence.signal;</span><br></pre></td></tr></table></figure>
+<h2 id="信号的订阅方式"><a href="#信号的订阅方式" class="headerlink" title="信号的订阅方式"></a>信号的订阅方式</h2><h3 id="订阅方法"><a href="#订阅方法" class="headerlink" title="订阅方法"></a>订阅方法</h3><p>RAC的作者煞费苦心的为我们提供了对一个信号的next、error、completed三种事件的排列组合的订阅方法，这里列举一种。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[signal11 subscribeNext:^(id x) &#123;</span><br><span class="line">       NSLog(@&quot;next value is %@&quot;,x);</span><br><span class="line">   &#125; error:^(NSError *error) &#123;</span><br><span class="line">       NSLog(@&quot;Ops! Get some error:%@&quot;,error);</span><br><span class="line">   &#125; completed:^&#123;</span><br><span class="line">       NSLog(@&quot;It finished success&quot;);</span><br><span class="line">   &#125;];</span><br></pre></td></tr></table></figure>
+<h3 id="绑定"><a href="#绑定" class="headerlink" title="绑定"></a>绑定</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RAC(btn, backgroundColor)  = [RACSignal return:[UIColor redColor]];</span><br></pre></td></tr></table></figure>
+<h3 id="Cocoa桥接-1"><a href="#Cocoa桥接-1" class="headerlink" title="Cocoa桥接"></a>Cocoa桥接</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[btn rac_liftSelector:@selector(convertRect:toView:) withSignals:signal1, signal2,nil];</span><br></pre></td></tr></table></figure>
+<h2 id="RACSignal各类操作"><a href="#RACSignal各类操作" class="headerlink" title="RACSignal各类操作"></a>RACSignal各类操作</h2><p>引用一张上一篇<a href="https://bosskaige.github.io/2018/02/05/ReactiveCocoa------ReactiveCocoa%E7%AE%80%E4%BB%8B/">Post</a>中的图例</p>
+<p><img src="/post_images/stream_operation.png" style="zoom:100%"> </p>
+<p>本篇文章主要围绕对值操作、对数量操作、对时间间隔操作及多个信号间的组合变换做深入探究，对维度的操作的探究会放在后续的文章中。</p>
+<p>在深入下去之前，需要先了解一下RACTuple，RAC中很多操作都会用到或产生RACTuple。</p>
+<h3 id="RACTuple"><a href="#RACTuple" class="headerlink" title="RACTuple"></a>RACTuple</h3><p>RACTuple（元组类）是RAC中的集合类，其底层实现是对NSArray的封装。RACTuple有以下特点：</p>
+<ul>
+<li>遵循NSFastEnumeration协议（可用for in枚举）</li>
+<li>遵循NSCopy协议</li>
+<li>遵循NSCoding协议</li>
+<li>实现了objectAtIndexedSubscript:方法（可用下标访问元素）</li>
+<li>可把NSNull.null转为RACTupleNil.tupleNil</li>
+<li>封装了一系列遍历的集合操作方法 </li>
+</ul>
+<h4 id="RACTuple的简单使用方式："><a href="#RACTuple的简单使用方式：" class="headerlink" title="RACTuple的简单使用方式："></a>RACTuple的简单使用方式：</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">//普通创建 </span><br><span class="line"> RACTuple *tuple1 = [RACTuple tupleWithObjects:@1, @2, @3, nil];</span><br><span class="line"> RACTuple *tuple2 = [RACTuple tupleWithObjectsFromArray:@[@1, @2, @3]];</span><br><span class="line"> RACTuple *tuple3 = [[RACTuple alloc] init]; </span><br><span class="line"></span><br><span class="line">//宏创建</span><br><span class="line"> RACTuple *tuple4 = RACTuplePack(@1, @2, @3, @4); </span><br><span class="line"></span><br><span class="line">//解包(等号前面是参数定义，后面是已存在的Tuple，参数个数需要跟Tuple元素相同）</span><br><span class="line"> RACTupleUnpack(NSNumber * value1, NSNumber * value2, NSNumber * value3, NSNumber * value4) = tuple4; </span><br><span class="line"></span><br><span class="line">//元素访问方式</span><br><span class="line"> NSLog(@&quot;%@&quot;, [tuple4 objectAtIndex:1]); NSLog(@&quot;%@&quot;, tuple4[1]);</span><br></pre></td></tr></table></figure>
+<h3 id="RACSignal的操作"><a href="#RACSignal的操作" class="headerlink" title="RACSignal的操作"></a>RACSignal的操作</h3><p>对于信号操作、变化后得到的结果会从Next事件、Error事件、Completed事件三个角度并结合相应图例给出，不会对其底层实现做深入探究。</p>
+<h4 id="对值操作"><a href="#对值操作" class="headerlink" title="对值操作"></a>对值操作</h4><h5 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h5><p>Next事件：新信号的值由原信号值经过映射得出。（映射由传入block给出）<br>Error事件：透传原信号error事件。<br>Completed事件：透传原信号completed事件。</p>
+<h6 id="图例"><a href="#图例" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/Map.png" style="zoom:100%"> </p>
+<h5 id="MapReplace"><a href="#MapReplace" class="headerlink" title="MapReplace"></a>MapReplace</h5><p>Next事件：原信号的值会被转换成一串相同的值。<br>Error事件：透传原信号error事件。<br>Completed事件：透传原信号completed事件。</p>
+<h6 id="图例-1"><a href="#图例-1" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/MapReplace.png" style="zoom:100%"> </p>
+<h5 id="ReduceEach"><a href="#ReduceEach" class="headerlink" title="ReduceEach"></a>ReduceEach</h5><p>ReduceEach操作要求原信号的值必须是一个元组（RACTuple）。</p>
+<p>Next事件：对原信号发送的元组进行解包，利用解包后的值作为block的入参经过映射得出新的值。（映射由block给出）。<br>Error事件：透传原信号error事件。<br>Completed事件：透传原信号completed事件。</p>
+<h6 id="图例-2"><a href="#图例-2" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/ReduceEach.png" style="zoom:100%"> </p>
+<h5 id="ReduceApply"><a href="#ReduceApply" class="headerlink" title="ReduceApply"></a>ReduceApply</h5><p>ReduceApply其功能类似于ReduceEach。不过这里和ReduceEach不同的是，源信号产生的每个元组（每个值）的第0个元素必须是一个block，后面n个元素为block的入参，第0位的block有几个入参，后面就需要有几个元素，多余的元素为无效元素。</p>
+<p>Next事件：对原信号发送的元组进行解包，以元组的第0个元素为block，其余元素为入参得出新的值。<br>Error事件：透传原信号error事件。<br>Completed事件：透传原信号completed事件。</p>
+<h6 id="图例-3"><a href="#图例-3" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/ReduceApply.png" style="zoom:100%"> </p>
+<h6 id="Coding"><a href="#Coding" class="headerlink" title="Coding"></a>Coding</h6><p>不是很好理解，这里给出相应代码。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">RACSignal * signalA = [RACSignal createSignal:^RACDisposable *(id&lt;RACSubscriber&gt; subscriber) &#123;</span><br><span class="line">      </span><br><span class="line">      id block = ^id(NSNumber * first,NSNumber * second)&#123;</span><br><span class="line">          return @(first.integerValue + second.integerValue);</span><br><span class="line">      &#125;;</span><br><span class="line">      </span><br><span class="line">      [subscriber sendNext:RACTuplePack(block,@1,@2,@5)];</span><br><span class="line">      return [RACDisposable disposableWithBlock:^&#123;</span><br><span class="line">      &#125;];</span><br><span class="line">  &#125;];</span><br><span class="line">  </span><br><span class="line">  RACSignal * signalB = [signalA reduceApply];</span><br><span class="line">  </span><br><span class="line">  [signalB subscribeNext:^(id x) &#123;</span><br><span class="line">      NSLog(@&quot;%@&quot;,x);</span><br><span class="line">  &#125;];</span><br></pre></td></tr></table></figure>
+<p>上例代码中block只有两个入参，所以只会取1，2计算得出新值3，tuple内的元素5为无效元素。</p>
+<h5 id="Not"><a href="#Not" class="headerlink" title="Not"></a>Not</h5><p>not操作要求源信号产生的每个值都是NSNumber类型。新信号的值由原信号值的布尔值取非得出。  </p>
+<p>Next事件：由原信号值的布尔值取非得出新的值。<br>Error事件：透传原信号error事件。<br>Completed事件：透传原信号completed事件。</p>
+<h6 id="图例-4"><a href="#图例-4" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/Not.png" style="zoom:100%"> </p>
+<h5 id="And"><a href="#And" class="headerlink" title="And"></a>And</h5><p>and操作要求源信号产生的每个值都是元组类型且元组内的每一个元素都必须是NSNumber类型。and操作会创建一个新的信号，新信号的值由元组内各元素的布尔值求与得出。  </p>
+<p>Next事件：由源信号发送的元组内各元素的布尔值求与得出新的值。<br>Error事件：透传原信号error事件。<br>Completed事件：透传原信号completed事件。</p>
+<h6 id="图例-5"><a href="#图例-5" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/and.png" style="zoom:100%"> </p>
+<h5 id="Or"><a href="#Or" class="headerlink" title="Or"></a>Or</h5><p>or操作与and操作类似，不同的是新信号的值由元组内各元素的布尔值求或得出。这里不做展开讨论。</p>
+<h5 id="Materialize"><a href="#Materialize" class="headerlink" title="Materialize"></a>Materialize</h5><p>materialize操作会创建一个新信号，新信号的值为将原信号的值包装为RACEvent类型。</p>
+<p>Next事件：由原信号的值包装为RACEvent类型得出新的值。<br>Error事件：透传原信号error事件。<br>Completed事件：透传原信号completed事件。</p>
+<h6 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h6><p>materialize操作通过源码更容易理解。通过对原信号的订阅，将原信号的值、error、complete包装成RACEvent类型。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">- (RACSignal *)materialize &#123;</span><br><span class="line">	return [[RACSignal createSignal:^(id&lt;RACSubscriber&gt; subscriber) &#123;</span><br><span class="line">		return [self subscribeNext:^(id x) &#123;</span><br><span class="line">			[subscriber sendNext:[RACEvent eventWithValue:x]];</span><br><span class="line">		&#125; error:^(NSError *error) &#123;</span><br><span class="line">			[subscriber sendNext:[RACEvent eventWithError:error]];</span><br><span class="line">			[subscriber sendCompleted];</span><br><span class="line">		&#125; completed:^&#123;</span><br><span class="line">			[subscriber sendNext:RACEvent.completedEvent];</span><br><span class="line">			[subscriber sendCompleted];</span><br><span class="line">		&#125;];</span><br><span class="line">	&#125;] setNameWithFormat:@&quot;[%@] -materialize&quot;, self.name];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="Dematerialize"><a href="#Dematerialize" class="headerlink" title="Dematerialize"></a>Dematerialize</h5><p>Dematerialize是materialize的逆操作,新信号的值为将原信号值（RACEvent类型）还原为正常的值信号。</p>
+<p>Next事件：由原信号的值(RACEvent类型)还原得出新的值。<br>Error事件：透传原信号error事件。<br>Completed事件：透传原信号completed事件。</p>
+<h6 id="源码-1"><a href="#源码-1" class="headerlink" title="源码"></a>源码</h6><p>同样通过源码来看dematerialize操作。通过bind函数对原信号进行变换。新信号会根据event.eventType进行转换。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">- (RACSignal *)dematerialize &#123;</span><br><span class="line">	return [[self bind:^&#123;</span><br><span class="line">		return ^(RACEvent *event, BOOL *stop) &#123;</span><br><span class="line">			switch (event.eventType) &#123;</span><br><span class="line">				case RACEventTypeCompleted:</span><br><span class="line">				*stop = YES;</span><br><span class="line">				return [RACSignal empty];</span><br><span class="line"></span><br><span class="line">			case RACEventTypeError:</span><br><span class="line">				*stop = YES;</span><br><span class="line">				return [RACSignal error:event.error];</span><br><span class="line"></span><br><span class="line">			case RACEventTypeNext:</span><br><span class="line">				return [RACSignal return:event.value];</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;;</span><br><span class="line">	&#125;] setNameWithFormat:@&quot;[%@] -dematerialize&quot;, self.name];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="数量操作"><a href="#数量操作" class="headerlink" title="数量操作"></a>数量操作</h4><h5 id="Filter"><a href="#Filter" class="headerlink" title="Filter"></a>Filter</h5><p>将原信号的值进行过滤后，符合条件的值会做为新信号的值返回，否则原信号的值会被吞掉。</p>
+<p>Next事件：对原信号发送的值进行过滤后得出。<br>Error事件：透传原信号error事件。<br>Completed事件：透传原信号completed事件。</p>
+<h6 id="图例-6"><a href="#图例-6" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/Filter.png" style="zoom:100%"> </p>
+<h5 id="Ignore"><a href="#Ignore" class="headerlink" title="Ignore"></a>Ignore</h5><p>ignore的底层实现是对Filter的封装。对原信号的值进行校验，与传入值相等的值会被吞掉，其他值会作为新信号的值返回。这里的相等为满足 “==” 操作符 或 “isEqual” 操作符。  </p>
+<p>Next事件：对原信号发送的值进行过滤后得出。<br>Error事件：透传原信号error事件。<br>Completed事件：透传原信号completed事件。</p>
+<h6 id="图例-7"><a href="#图例-7" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/ignore.png" style="zoom:100%"> </p>
+<h5 id="IgnoreValues"><a href="#IgnoreValues" class="headerlink" title="IgnoreValues"></a>IgnoreValues</h5><p>ignoreValues的底层实现同样是对Filter的封装。创建一个忽略所有原有信号值的信号。即新信号不会发送任何next事件。这里不做展开讨论。</p>
+<h5 id="DistinctUntilChanged"><a href="#DistinctUntilChanged" class="headerlink" title="DistinctUntilChanged"></a>DistinctUntilChanged</h5><p>distinctUntilChanged操作会对接收到的原信号的值与原信号上一次发送的值做校验，如果相等则忽略该值，只有和原信号上一次发送的值不同才会做为新信号的值进行传递。这里的相等同样是指满足 “==” 操作符 或 “isEqual” 操作符。</p>
+<p>Next事件：对原信号的值与上一次的值做校验，当前值与上一次值不一致时做为新信号的值发送。<br>Error事件：透传原信号error事件。<br>Completed事件：透传原信号completed事件。</p>
+<h6 id="图例-8"><a href="#图例-8" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/DistinctUntilChanged.png" style="zoom:100%"> </p>
+<h5 id="Take"><a href="#Take" class="headerlink" title="Take"></a>Take</h5><p>take操作的入参为取原信号的前X个值，做为新信号的值返回，忽略原信号前x值以后的值。  </p>
+<p>Next事件：取原信号的前x个值作为新信号的值，忽略其他值。<br>Error事件：透传原信号error事件。<br>Completed事件：透传原信号completed事件。</p>
+<h6 id="图例-9"><a href="#图例-9" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/take.png" style="zoom:100%"> </p>
+<h5 id="Skip"><a href="#Skip" class="headerlink" title="Skip"></a>Skip</h5><p>skip操作和take操作是补集关系。take是取原信号的前count个信号值，而skip是从原信号的第count + 1个信号值开始取值做为新信号的值返回。这里不做展开讨论。</p>
+<h5 id="TakeLast"><a href="#TakeLast" class="headerlink" title="TakeLast"></a>TakeLast</h5><p>takeLast和take用法一样，不过他取的是原信号的最后x个值。需要注意的是：takeLast一定要调用sendCompleted，告诉他发送完成了，这样才能取到最后几个值，这里也就不对其进行展开了。</p>
+<h5 id="TakeUntilBlock"><a href="#TakeUntilBlock" class="headerlink" title="TakeUntilBlock"></a>TakeUntilBlock</h5><p>根据传入的block做为校验条件。新信号透传原信号发送的值直至原信号发送的值满足校验条件，此时新信号停止发送值。  </p>
+<p>Next事件：取原信号的值作为新信号的值直至满足校验条件。<br>Error事件：透传原信号error事件。<br>Completed事件：透传原信号completed事件。</p>
+<h6 id="图例-10"><a href="#图例-10" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/takeUntilBlock.png" style="zoom:100%"> </p>
+<h5 id="SkipUntilBlock"><a href="#SkipUntilBlock" class="headerlink" title="SkipUntilBlock"></a>SkipUntilBlock</h5><p>根据传入的block做为校验条件。新信号忽略原信号发送的值直至原信号发送的值满足校验条件，此时新信号开始透传原信号发送的值。</p>
+<p>Next事件：忽略原信号发送的值直至原信号发送的值满足校验条件。<br>Error事件：透传原信号error事件。<br>Completed事件：透传原信号completed事件。</p>
+<h6 id="图例-11"><a href="#图例-11" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/skipUntilBlock.png" style="zoom:100%"> </p>
+<h5 id="SkipWhileBlock"><a href="#SkipWhileBlock" class="headerlink" title="SkipWhileBlock"></a>SkipWhileBlock</h5><p>根据传入的block做为校验条件。新信号忽略原信号发送的值直至发送的值不满足校验条件。此时新信号开始透传原信号发送的值。  </p>
+<p>Next事件：忽略原信号发送的值直至原信号发送的值不满足校验条件。<br>Error事件：透传原信号error事件。<br>Completed事件：透传原信号completed事件。</p>
+<h6 id="图例-12"><a href="#图例-12" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/skipWhileBlock.png" style="zoom:100%"> </p>
+<h5 id="Any"><a href="#Any" class="headerlink" title="Any:"></a>Any:</h5><p>Any:操作根据传入block作为校验条件。如果原信号发送的值中有任何满足校验条件的值新信号发送@1（yes）。 如原信号中无任何满足校验条件的值，在原信号调用sendCompleted后，新信号发送@0（no）。<br>注意：使用Any:操作原信号必须调用sendCompleted，否则在所有值都校验失败的情况下新信号不会发送@0（no）. </p>
+<p>Next事件：原信号所发送的值中有任何值满足校验条件发送@1（yes），否则发送 @0（no）。<br>Error事件：透传原信号error事件。<br>Completed事件：透传原信号completed事件。</p>
+<h6 id="图例-13"><a href="#图例-13" class="headerlink" title="图例"></a>图例</h6><p>校验失败</p>
+<p><img src="/post_images/Any-faild.png" style="zoom:100%"> </p>
+<p>校验成功</p>
+<p><img src="/post_images/any-success.png" style="zoom:100%"></p>
+<h5 id="Any-1"><a href="#Any-1" class="headerlink" title="Any"></a>Any</h5><p>当原信号发送任何值，新信号就会发送@1（yes）。Any操作也需要原信号调用sendCompleted，否则在原信号不发送任何值的情况下，新信号不会发送@0（no），这里就不做展开了。</p>
+<h5 id="All"><a href="#All" class="headerlink" title="All:"></a>All:</h5><p>All:操作以传入blcok作为校验条件，当原信号发送的任何值都满足校验条件时，新信号会发送@1（yes），否则新信号发送@0（no）。All:同样需要原信号调用sendCompleted。比较容易理解，也就不再展开。</p>
+<h5 id="StartWith"><a href="#StartWith" class="headerlink" title="StartWith"></a>StartWith</h5><p>startWIth操作，利用contact（后续会提到）在透传原信号发送的值之前插入一个初始值。</p>
+<p>Next事件：在原信号发送的值之前插入一个初始值。<br>Error事件：透传原信号error事件。<br>Completed事件：透传原信号completed事件。</p>
+<h6 id="图例-14"><a href="#图例-14" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/startWith.png" style="zoom:100%"> </p>
+<h5 id="Repeat"><a href="#Repeat" class="headerlink" title="Repeat"></a>Repeat</h5><p>在原信号发送completed事件后，持续重复发送原信号的值。</p>
+<p>Next事件：在原信号发送completed之前，发送原信号的值。 在原信号发送completed事件后，持续重复发送原信号的值。<br>Error事件：透传原信号error事件。不再重复发送原信号的值。<br>Completed事件：无completed事件。</p>
+<h6 id="图例-15"><a href="#图例-15" class="headerlink" title="图例"></a>图例</h6><p>原信号未发送error、completed<br><img src="/post_images/repeat_no_error-completed.png" style="zoom:100%"> </p>
+<p>原信号发送error<br><img src="/post_images/repeat_send_error.png" style="zoom:100%"> </p>
+<p>原信号发送completed<br><img src="/post_images/repeat_send_completed.png" style="zoom:100%"> </p>
+<h5 id="Retry"><a href="#Retry" class="headerlink" title="Retry:"></a>Retry:</h5><p>透传原信号发送的值,在原信号出现error的时候，重试x次（重复订阅原信号x次），如果依旧error那么就会停止重试。</p>
+<p>Next事件: 发送原信号的值,在原信号发送error后，重试x次。<br>Error事件：在原信号发送error后，重试x次。如果依旧错误传递error。<br>Completed事件：透传completed事件。</p>
+<h6 id="图例-16"><a href="#图例-16" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/retry.png" style="zoom:100%"> </p>
+<h5 id="Retry-1"><a href="#Retry-1" class="headerlink" title="Retry"></a>Retry</h5><p>retry为无限重试操作。底层为调用retry:实现，此时的入参为0。这里不做展开讨论。</p>
+<h5 id="Collect"><a href="#Collect" class="headerlink" title="Collect"></a>Collect</h5><p>Next事件: 将原信号的值收集起来，保存在NSMutableArray中，做为新信号的值。在原信号发送completed事件后发送该值。<br>Error事件：在原信号发送error后，丢弃所有值并传递error事件。<br>Completed事件：收到原信号的completed事件后发送收集起来的值并透传completed事件。</p>
+<h6 id="图例-17"><a href="#图例-17" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/collect.png" style="zoom:100%"> </p>
+<h5 id="ScanWithStart-reduce"><a href="#ScanWithStart-reduce" class="headerlink" title="ScanWithStart:reduce:"></a>ScanWithStart:reduce:</h5><p>Next事件: 以第一个入参为初始值，原信号每发送一个值以reduceBlock的策略为递推计算结果，计算结果作为新信号的值立刻发送。<br>Error事件：透传error事件。<br>Completed事件：透传completed事件。</p>
+<h6 id="图例-18"><a href="#图例-18" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/ScanWithStart-reduce-.png" style="zoom:100%"> </p>
+<h5 id="AggregateWithStart-reduce"><a href="#AggregateWithStart-reduce" class="headerlink" title="AggregateWithStart:reduce:"></a>AggregateWithStart:reduce:</h5><p>本质为调用scanWithStart:reduce:操作和takeLast组合实现。</p>
+<p>Next事件: 以第一个入参为初始值，原信号每发送一个值以reduceBlock的策略为递推计算结果，在原信号发送sendCompleted后，新信号发送递推所得计算结果。<br>Error事件：透传error事件、丢弃计算结果。<br>Completed事件：发送计算结果并透传completed事件。</p>
+<h6 id="图例-19"><a href="#图例-19" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/Aggregate.png" style="zoom:100%"> </p>
+<h5 id="AggregateWithStartFactory-reduce"><a href="#AggregateWithStartFactory-reduce" class="headerlink" title="AggregateWithStartFactory: reduce:"></a>AggregateWithStartFactory: reduce:</h5><p>startFactory :aggregateWithStartFactory 本质为调用 aggregateWithStart实现，startFactory代码块的计算结果会作为start的入参传入aggregateWithStart。这里不做进一步展开。</p>
+<h5 id="AggregateWithStart-reduceWithIndex"><a href="#AggregateWithStart-reduceWithIndex" class="headerlink" title="AggregateWithStart:reduceWithIndex:"></a>AggregateWithStart:reduceWithIndex:</h5><p>在aggregateWithStart:reduce: 的基础上，每次reduceBlock的递推都会带上统计当前递推次数的index。底层实现aggregateWithStart:reduce:为调用aggregateWithStart:reduceWithIndex:时忽略index参数。不做展开讨论。</p>
+<h5 id="ScanWithStart-reduceWithIndex"><a href="#ScanWithStart-reduceWithIndex" class="headerlink" title="ScanWithStart:reduceWithIndex:"></a>ScanWithStart:reduceWithIndex:</h5><p>功能上与scanWithStart:reduce:类似，同样在reduceBlock会携带当前递推次数的index。scanWithStart:reduce:的底层实现同样为调用scanWithStart:reduceWithIndex:时忽略block内的index入参。同样不做展开讨论。</p>
+<h4 id="对时间间隔操作"><a href="#对时间间隔操作" class="headerlink" title="对时间间隔操作"></a>对时间间隔操作</h4><h5 id="Delay"><a href="#Delay" class="headerlink" title="Delay:"></a>Delay:</h5><p>Delay:操作对原信号的next事件和completed事件延时发送，比较容易理解这里不做展开讨论。<br>Next事件: 对原信号的值延迟x秒发送。<br>Error事件：立即透传error事件。<br>Completed事件：对于原信号的Completed事件延迟x秒发送。</p>
+<h5 id="Throttle"><a href="#Throttle" class="headerlink" title="Throttle:"></a>Throttle:</h5><p>throttle:通常用于搜索输入框，在用户享受实时更新搜索数据的同时减轻服务端压力。这里简单的Coding不能很形象说明，就不再编写代码。</p>
+<p>Next事件: 原信号在x秒内无新的值产生，新信号发送该值。<br>Error事件：透传error事件，如果之前有未发送next事件丢弃该事件（不再发送）。<br>Completed事件：新信号立刻透传该事件，如果之前有未发送next事件的值立即发送该值。</p>
+<h6 id="图例-20"><a href="#图例-20" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/throttle.png" style="zoom:100%"> </p>
+<h5 id="Throttle-valuesPassingTest"><a href="#Throttle-valuesPassingTest" class="headerlink" title="Throttle:valuesPassingTest:"></a>Throttle:valuesPassingTest:</h5><p>在throttle：的基础上加入校验操作。</p>
+<p>Next事件: 对原信号发送的值进行校验，校验失败丢弃该值。校验成功，若原信号在x秒内无新的校验成功的next值产生，新信号发送该值。<br>Error事件：透传error事件，如果之前有未发送next事件的值丢弃该值（不再发送）。<br>Completed事件：新信号立刻透传该事件，如果之前有未发送校验成功的next事件的值立即发送该值。</p>
+<h5 id="BufferWithTime-onScheduler"><a href="#BufferWithTime-onScheduler" class="headerlink" title="BufferWithTime:onScheduler"></a>BufferWithTime:onScheduler</h5><p>Next事件: 缓冲原信号未来一段时间内发送的next事件，将所有值包装成RACTuple返回。<br>Error事件：透传error事件，丢弃缓冲池内的值。<br>Completed事件：将缓冲池内的next事件立即发送后，立即透传completed事件。</p>
+<h4 id="多信号的组合、变换"><a href="#多信号的组合、变换" class="headerlink" title="多信号的组合、变换"></a>多信号的组合、变换</h4><h5 id="Concat"><a href="#Concat" class="headerlink" title="Concat:"></a>Concat:</h5><p>对A、B两个信号进行链接，A发送completed事件后开始发送B信号的事件。  </p>
+<p>Next事件：透传A信号的值，A信号发送completed事件后开始透传B信号的值。<br>Error事件：A、B任一信号发出error事件后透传该事件，且不再进行拼接操作。<br>Completed事件：B信号发送completed事件后，新信号发送completed事件。 </p>
+<h6 id="图例-21"><a href="#图例-21" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/Concat.png" style="zoom:100%"> </p>
+<p>concat操作不会改变原有信号值的发送线程。</p>
+<h5 id="Merge"><a href="#Merge" class="headerlink" title="Merge:"></a>Merge:</h5><p>将A、B两个信号进行合并。  </p>
+<p>Next事件：按时间顺序透传A、B两信号的next事件。<br>Error事件：A、B两信号，任意信号发送error事件，透传error事件。<br>Completed事件：A、B两信号，均发送completed事件后，新信号发送completed事件。</p>
+<h6 id="图例-22"><a href="#图例-22" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/Merge.png" style="zoom:100%"> </p>
+<p>merge操作不会改变原有信号值的发送线程。</p>
+<h5 id="Zip"><a href="#Zip" class="headerlink" title="Zip:"></a>Zip:</h5><p>将A、B两信号发送的值压缩为一个元组。每个流的第一个值将被合并、然后是第二个、第三个，直到一个流被终止。  </p>
+<p>Next事件：在A、B两信号都发送next事件后，将next事件携带值合并成一个元组作。新信号以该元组为值发送next事件。<br>Error事件：A、B两信号，任意信号发送error事件，透传error事件。<br>Completed事件：A、B两信号，任意信号发送completed，新信号发送completed事件。  </p>
+<h6 id="图例-23"><a href="#图例-23" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/Zip.png" style="zoom:100%"> </p>
+<p>Zip操作新信号发送事件的线程与触发线程一致。</p>
+<h5 id="CombineLatest"><a href="#CombineLatest" class="headerlink" title="CombineLatest:"></a>CombineLatest:</h5><p>Next事件：将来自A/B两信号的最新值组合成一个RACTuples，A、B任何一个信号发送值（如果另一个信号曾经发送过值）都会产生一个RACTuple并传递下去。<br>Error事件：A/B两信号，任意信号发送error事件，透传error事件。<br>Completed事件：A/B两信号，任意信号发送completed事件，透传completed事件。  </p>
+<h6 id="图例-24"><a href="#图例-24" class="headerlink" title="图例"></a>图例</h6><p><img src="/post_images/CombineLatest.png" style="zoom:100%"> </p>
+<p>CombineLatest操作新信号发送事件的线程与触发线程一致。</p>
+<h3 id="斐波那契数列信号"><a href="#斐波那契数列信号" class="headerlink" title="斐波那契数列信号"></a>斐波那契数列信号</h3><p>在之前的一篇<a href="https://bosskaige.github.io/2018/02/04/ReactiveCocoa------%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E5%88%9D%E6%8E%A2/">Post</a>里提示出提到我们可以用函数式编程表示一个无限的数据结构如斐波那契数列、无限递增的数据结构。<br>那么在RAC中应该如何来做呢？</p>
+<h4 id="斐波那契数列"><a href="#斐波那契数列" class="headerlink" title="斐波那契数列"></a>斐波那契数列</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">RACSignal *repeat1 = [[RACSignal return:@1] repeat];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">RACSignal *signalB = [repeat1 scanWithStart:RACTuplePack(@1, @1) reduce:^id(RACTuple *running, id _) &#123;</span><br><span class="line">    NSNumber * next = @([running.first integerValue] + [running.second integerValue]);</span><br><span class="line">    return RACTuplePack(running.second, next);</span><br><span class="line">&#125;];</span><br><span class="line"></span><br><span class="line">[signalB subscribeNext:^(id x) &#123;</span><br><span class="line">    NSLog(@&quot;%@&quot;,x);</span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+<h4 id="无限递增的数据结构"><a href="#无限递增的数据结构" class="headerlink" title="无限递增的数据结构"></a>无限递增的数据结构</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">RACSignal *repeat1 = [[RACSignal return:@1] repeat];</span><br><span class="line"></span><br><span class="line">RACSignal *signalB = [repeat1 scanWithStart:@0 reduce:^id(NSNumber * running, NSNumber * next) &#123;</span><br><span class="line">    return @(running.integerValue + next.integerValue);</span><br><span class="line">&#125;];</span><br><span class="line"></span><br><span class="line">[signalB subscribeNext:^(id x) &#123;</span><br><span class="line">    NSLog(@&quot;%@&quot;,x);</span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+<p>To be continue…</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ReactiveCocoa/" rel="tag"># ReactiveCocoa</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/05/ReactiveCocoa------ReactiveCocoa简介/" rel="next" title="ReactiveCocoa------ReactiveCocoa简介">
+                <i class="fa fa-chevron-left"></i> ReactiveCocoa------ReactiveCocoa简介
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="王凯" />
+            
+              <p class="site-author-name" itemprop="name">王凯</p>
+              <p class="site-description motion-element" itemprop="description">The shortest answer is doing!</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/BossKaiGe" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:angxian66@163.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://blog.csdn.net/uitguyrff" target="_blank" title="CSDN">
+                    
+                      <i class="fa fa-fw fa-instagram"></i>CSDN</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RACSignal的创建"><span class="nav-number">2.</span> <span class="nav-text">RACSignal的创建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#单元信号"><span class="nav-number">2.1.</span> <span class="nav-text">单元信号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#动态信号"><span class="nav-number">2.2.</span> <span class="nav-text">动态信号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Cocoa桥接"><span class="nav-number">2.3.</span> <span class="nav-text">Cocoa桥接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#信号变换"><span class="nav-number">2.4.</span> <span class="nav-text">信号变换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#序列转换"><span class="nav-number">2.5.</span> <span class="nav-text">序列转换</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#信号的订阅方式"><span class="nav-number">3.</span> <span class="nav-text">信号的订阅方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#订阅方法"><span class="nav-number">3.1.</span> <span class="nav-text">订阅方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#绑定"><span class="nav-number">3.2.</span> <span class="nav-text">绑定</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Cocoa桥接-1"><span class="nav-number">3.3.</span> <span class="nav-text">Cocoa桥接</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RACSignal各类操作"><span class="nav-number">4.</span> <span class="nav-text">RACSignal各类操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RACTuple"><span class="nav-number">4.1.</span> <span class="nav-text">RACTuple</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#RACTuple的简单使用方式："><span class="nav-number">4.1.1.</span> <span class="nav-text">RACTuple的简单使用方式：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RACSignal的操作"><span class="nav-number">4.2.</span> <span class="nav-text">RACSignal的操作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#对值操作"><span class="nav-number">4.2.1.</span> <span class="nav-text">对值操作</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Map"><span class="nav-number">4.2.1.1.</span> <span class="nav-text">Map</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例"><span class="nav-number">4.2.1.1.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#MapReplace"><span class="nav-number">4.2.1.2.</span> <span class="nav-text">MapReplace</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-1"><span class="nav-number">4.2.1.2.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ReduceEach"><span class="nav-number">4.2.1.3.</span> <span class="nav-text">ReduceEach</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-2"><span class="nav-number">4.2.1.3.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ReduceApply"><span class="nav-number">4.2.1.4.</span> <span class="nav-text">ReduceApply</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-3"><span class="nav-number">4.2.1.4.1.</span> <span class="nav-text">图例</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Coding"><span class="nav-number">4.2.1.4.2.</span> <span class="nav-text">Coding</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Not"><span class="nav-number">4.2.1.5.</span> <span class="nav-text">Not</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-4"><span class="nav-number">4.2.1.5.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#And"><span class="nav-number">4.2.1.6.</span> <span class="nav-text">And</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-5"><span class="nav-number">4.2.1.6.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Or"><span class="nav-number">4.2.1.7.</span> <span class="nav-text">Or</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Materialize"><span class="nav-number">4.2.1.8.</span> <span class="nav-text">Materialize</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#源码"><span class="nav-number">4.2.1.8.1.</span> <span class="nav-text">源码</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Dematerialize"><span class="nav-number">4.2.1.9.</span> <span class="nav-text">Dematerialize</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#源码-1"><span class="nav-number">4.2.1.9.1.</span> <span class="nav-text">源码</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数量操作"><span class="nav-number">4.2.2.</span> <span class="nav-text">数量操作</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Filter"><span class="nav-number">4.2.2.1.</span> <span class="nav-text">Filter</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-6"><span class="nav-number">4.2.2.1.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Ignore"><span class="nav-number">4.2.2.2.</span> <span class="nav-text">Ignore</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-7"><span class="nav-number">4.2.2.2.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#IgnoreValues"><span class="nav-number">4.2.2.3.</span> <span class="nav-text">IgnoreValues</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#DistinctUntilChanged"><span class="nav-number">4.2.2.4.</span> <span class="nav-text">DistinctUntilChanged</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-8"><span class="nav-number">4.2.2.4.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Take"><span class="nav-number">4.2.2.5.</span> <span class="nav-text">Take</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-9"><span class="nav-number">4.2.2.5.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Skip"><span class="nav-number">4.2.2.6.</span> <span class="nav-text">Skip</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#TakeLast"><span class="nav-number">4.2.2.7.</span> <span class="nav-text">TakeLast</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#TakeUntilBlock"><span class="nav-number">4.2.2.8.</span> <span class="nav-text">TakeUntilBlock</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-10"><span class="nav-number">4.2.2.8.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SkipUntilBlock"><span class="nav-number">4.2.2.9.</span> <span class="nav-text">SkipUntilBlock</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-11"><span class="nav-number">4.2.2.9.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SkipWhileBlock"><span class="nav-number">4.2.2.10.</span> <span class="nav-text">SkipWhileBlock</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-12"><span class="nav-number">4.2.2.10.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Any"><span class="nav-number">4.2.2.11.</span> <span class="nav-text">Any:</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-13"><span class="nav-number">4.2.2.11.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Any-1"><span class="nav-number">4.2.2.12.</span> <span class="nav-text">Any</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#All"><span class="nav-number">4.2.2.13.</span> <span class="nav-text">All:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#StartWith"><span class="nav-number">4.2.2.14.</span> <span class="nav-text">StartWith</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-14"><span class="nav-number">4.2.2.14.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Repeat"><span class="nav-number">4.2.2.15.</span> <span class="nav-text">Repeat</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-15"><span class="nav-number">4.2.2.15.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Retry"><span class="nav-number">4.2.2.16.</span> <span class="nav-text">Retry:</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-16"><span class="nav-number">4.2.2.16.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Retry-1"><span class="nav-number">4.2.2.17.</span> <span class="nav-text">Retry</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Collect"><span class="nav-number">4.2.2.18.</span> <span class="nav-text">Collect</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-17"><span class="nav-number">4.2.2.18.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ScanWithStart-reduce"><span class="nav-number">4.2.2.19.</span> <span class="nav-text">ScanWithStart:reduce:</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-18"><span class="nav-number">4.2.2.19.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#AggregateWithStart-reduce"><span class="nav-number">4.2.2.20.</span> <span class="nav-text">AggregateWithStart:reduce:</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-19"><span class="nav-number">4.2.2.20.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#AggregateWithStartFactory-reduce"><span class="nav-number">4.2.2.21.</span> <span class="nav-text">AggregateWithStartFactory: reduce:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#AggregateWithStart-reduceWithIndex"><span class="nav-number">4.2.2.22.</span> <span class="nav-text">AggregateWithStart:reduceWithIndex:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ScanWithStart-reduceWithIndex"><span class="nav-number">4.2.2.23.</span> <span class="nav-text">ScanWithStart:reduceWithIndex:</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#对时间间隔操作"><span class="nav-number">4.2.3.</span> <span class="nav-text">对时间间隔操作</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Delay"><span class="nav-number">4.2.3.1.</span> <span class="nav-text">Delay:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Throttle"><span class="nav-number">4.2.3.2.</span> <span class="nav-text">Throttle:</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-20"><span class="nav-number">4.2.3.2.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Throttle-valuesPassingTest"><span class="nav-number">4.2.3.3.</span> <span class="nav-text">Throttle:valuesPassingTest:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#BufferWithTime-onScheduler"><span class="nav-number">4.2.3.4.</span> <span class="nav-text">BufferWithTime:onScheduler</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#多信号的组合、变换"><span class="nav-number">4.2.4.</span> <span class="nav-text">多信号的组合、变换</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Concat"><span class="nav-number">4.2.4.1.</span> <span class="nav-text">Concat:</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-21"><span class="nav-number">4.2.4.1.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Merge"><span class="nav-number">4.2.4.2.</span> <span class="nav-text">Merge:</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-22"><span class="nav-number">4.2.4.2.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Zip"><span class="nav-number">4.2.4.3.</span> <span class="nav-text">Zip:</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-23"><span class="nav-number">4.2.4.3.1.</span> <span class="nav-text">图例</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#CombineLatest"><span class="nav-number">4.2.4.4.</span> <span class="nav-text">CombineLatest:</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#图例-24"><span class="nav-number">4.2.4.4.1.</span> <span class="nav-text">图例</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#斐波那契数列信号"><span class="nav-number">4.3.</span> <span class="nav-text">斐波那契数列信号</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#斐波那契数列"><span class="nav-number">4.3.1.</span> <span class="nav-text">斐波那契数列</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#无限递增的数据结构"><span class="nav-number">4.3.2.</span> <span class="nav-text">无限递增的数据结构</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王凯</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
