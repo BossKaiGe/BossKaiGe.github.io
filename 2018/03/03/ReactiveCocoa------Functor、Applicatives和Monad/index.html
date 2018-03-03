@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="ReactiveCocoa," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引言计算机科学习惯于为抽象概念命名术语，我们也从这些术语中获益良多。这些术语使我们在交流中能够引用抽象概念，并立即使对方知道我们的意思，比如我们从设计模式的共享名称（工厂、装饰器等）中获益良多。其中一些术语非常抽象，如：函数式编程中的Functor、Applicatives和Monad。 Functor、Applica">
+<meta name="keywords" content="ReactiveCocoa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ReactiveCocoa------Functor、Applicatives和Monad">
+<meta property="og:url" content="https://bosskaige.github.io/2018/03/03/ReactiveCocoa------Functor、Applicatives和Monad/index.html">
+<meta property="og:site_name" content="Kai&#39;s Blog">
+<meta property="og:description" content="引言计算机科学习惯于为抽象概念命名术语，我们也从这些术语中获益良多。这些术语使我们在交流中能够引用抽象概念，并立即使对方知道我们的意思，比如我们从设计模式的共享名称（工厂、装饰器等）中获益良多。其中一些术语非常抽象，如：函数式编程中的Functor、Applicatives和Monad。 Functor、Applicatives和Monad的概念源自范畴论。本篇笔者从Swift的Optional入">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-03-03T09:48:17.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ReactiveCocoa------Functor、Applicatives和Monad">
+<meta name="twitter:description" content="引言计算机科学习惯于为抽象概念命名术语，我们也从这些术语中获益良多。这些术语使我们在交流中能够引用抽象概念，并立即使对方知道我们的意思，比如我们从设计模式的共享名称（工厂、装饰器等）中获益良多。其中一些术语非常抽象，如：函数式编程中的Functor、Applicatives和Monad。 Functor、Applicatives和Monad的概念源自范畴论。本篇笔者从Swift的Optional入">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://bosskaige.github.io/2018/03/03/ReactiveCocoa------Functor、Applicatives和Monad/"/>
+
+
+
+
+
+  <title>ReactiveCocoa------Functor、Applicatives和Monad | Kai's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Kai's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://bosskaige.github.io/2018/03/03/ReactiveCocoa------Functor、Applicatives和Monad/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="王凯">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kai's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ReactiveCocoa------Functor、Applicatives和Monad</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-03T00:00:00+08:00">
+                2018-03-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ReactiveCocoa/" itemprop="url" rel="index">
+                    <span itemprop="name">ReactiveCocoa</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>计算机科学习惯于为抽象概念命名术语，我们也从这些术语中获益良多。这些术语使我们在交流中能够引用抽象概念，并立即使对方知道我们的意思，比如我们从设计模式的共享名称（工厂、装饰器等）中获益良多。其中一些术语非常抽象，如：函数式编程中的Functor、Applicatives和Monad。</p>
+<p>Functor、Applicatives和Monad的概念源自范畴论。本篇笔者从Swift的Optional入手阐述Functor、Applicatives和Monad在函数式编程中的概念。对比于OC，swift提供了对函数式编程更好的支持。</p>
+<h2 id="Optional"><a href="#Optional" class="headerlink" title="Optional"></a>Optional</h2><p>Apple在WWDC 2014开发者大会上发布了用于Mac OS X和iOS编程的新一代编程语言Swift。Optional（可选值）为Swift中一个重要的概念。</p>
+<h3 id="Optional-封装后的值"><a href="#Optional-封装后的值" class="headerlink" title="Optional-封装后的值"></a>Optional-封装后的值</h3><p>Optional数据类型事实上就是封装后的值，即对值及其上下文环境进行封装的结果。 </p>
+<p>Optional的定义：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public enum Optional&lt;Wrapped&gt; &#123;</span><br><span class="line">    case none</span><br><span class="line">    case some(Wrapped)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>一个Optional类型的值，为空的时候就是.none,不为空的时候就是.some。当我们将一个函数应用于Optional，不同上下文（.some或.none）我们将得到不同的结果。函数式编程中Functor、Applicatives和Monad的概念就是基于对封装后的值进行操作。  </p>
+<p>函数式编程中将值与上下文进行封装，对封装后的值进行操作可以集中于我们想要完成的事情，省去了异常分支（.none）的判断、嵌套。这样的代码具有更高的可读性，也更不易出错。如在RAC中对RACSignal发送的map、filter操作的过程中，我们将精力集中在next事件上，error、completed事件的传递处理都封装在RACSignal中。</p>
+<h2 id="MyOptional"><a href="#MyOptional" class="headerlink" title="MyOptional"></a>MyOptional</h2><p>Swift的Optional只满足函数式编程中的Functor,Monad，并不满足Applicatives的概念。笔者在<a href="https://bosskaige.github.io/2018/03/03/ReactiveCocoa------ReactiveCocoa高阶操作/">ReactiveCocoa高阶操作</a>中给出了Functor、Applicatives和Monad概念定义。本篇中笔者用Swift实现满足Functor、Applicatives和Monad概念的MyOptional对这些概念进一步阐述。  </p>
+<h3 id="MyOptional定义"><a href="#MyOptional定义" class="headerlink" title="MyOptional定义"></a>MyOptional定义</h3><p>类似Optional 给出简单定义</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">enum MyOperation &lt;T&gt; &#123;</span><br><span class="line">    case some(T)</span><br><span class="line">    case none</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们可以将Functor、Applicatives和Monad理解为一种协议，遵循该协议实现对应的方法，即为满足Functor、Applicatives和Monad。</p>
+<h3 id="Functor"><a href="#Functor" class="headerlink" title="Functor"></a>Functor</h3><blockquote>
+<p>Functor:应用一个函数到封装后的对象。  </p>
+</blockquote>
+<p>添加map函数，应用函数到MyOptional对象，使MyOptional满足Functor。</p>
+<h4 id="map实现"><a href="#map实现" class="headerlink" title="map实现"></a>map实现</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">extension MyOptional&#123;</span><br><span class="line">    //应用一个函数到MyOptional</span><br><span class="line">    func map&lt;U&gt;(f: (T) -&gt; U) -&gt; MyOptional&lt;U&gt; &#123;</span><br><span class="line">        switch self &#123;</span><br><span class="line">        case let .some(a):</span><br><span class="line">            return MyOptional&lt;U&gt;.some(f(a))</span><br><span class="line">            </span><br><span class="line">        case .none:</span><br><span class="line">            return MyOptional&lt;U&gt;.none</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="map使用"><a href="#map使用" class="headerlink" title="map使用"></a>map使用</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">func plusTree(addend:Int) -&gt; Int &#123;</span><br><span class="line"> 		return  addend + 3</span><br><span class="line"> 	&#125;</span><br><span class="line">       </span><br><span class="line">let some = MyOptional.some(2).map(f: plusTree)</span><br><span class="line">  	let none = MyOptional&lt;Int&gt;.none.map(f: plusTree)</span><br><span class="line">       </span><br><span class="line"> 	print(some)// output some(5)</span><br><span class="line"> 	print(none)// output none</span><br></pre></td></tr></table></figure>
+<p>通过map方法，应用plusTree到MyOptional对象，同时在plusTree中我们只关注想要执行的操作，.none的异常分支被封装在MyOptional的map实现中。</p>
+<h3 id="Applicatives"><a href="#Applicatives" class="headerlink" title="Applicatives"></a>Applicatives</h3><blockquote>
+<p>Applicatives:应用一个封装后的方法到一个封装后的对象。</p>
+</blockquote>
+<p>函数式编程中函数是一等公民，我们可以将值与其上下文进行封装，同样我们也可以将函数与其上下文进行封装。  </p>
+<p>添加apply函数，应用函数到MyOptional对象，使MyOptional满足Applicatives。 </p>
+<h4 id="apply实现"><a href="#apply实现" class="headerlink" title="apply实现"></a>apply实现</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">extension MyOperation&#123;</span><br><span class="line">    //应用一个封装过的函数到MyOperation</span><br><span class="line">    func apply&lt;U&gt;(f:(MyOperation&lt;(T)-&gt;U&gt;))-&gt; MyOperation&lt;U&gt; &#123;</span><br><span class="line">        switch f &#123;</span><br><span class="line">        case let .some(someF):</span><br><span class="line">            return self.map(f: someF)</span><br><span class="line">        case .none:</span><br><span class="line">            return .none</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br><span class="line">~~~ </span><br><span class="line"></span><br><span class="line">#### apply使用</span><br></pre></td></tr></table></figure>
+<pre><code> func plusTree(addend:Int) -&gt; Int {
+       return  addend + 3
+  }
+
+ let funcSome = MyOptional.some(plusTree)
+ let funcNone = MyOptional&lt;(Int)-&gt;Int&gt;.none
+
+let some = MyOptional.some(2).apply(f: funcSome)
+ let none = MyOptional.some(2).apply(f: funcNone) 
+
+  print(some)// output some(5)
+  print(none)// output none
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">将plusTree和 MyOptional&lt;(Int)-&gt;Int&gt;.none封装为MyOption，并通过apply进行调用。</span><br><span class="line"></span><br><span class="line">### Monad</span><br><span class="line"></span><br><span class="line">&gt; Monad：应用一个返回封装后的对象的方法到一个封装后的对象。</span><br><span class="line"></span><br><span class="line">添加flatMap函数，应用一个返回封装后的对象的函数到一个封装后的对象。使MyOptional满足Monad。</span><br><span class="line"></span><br><span class="line">#### flatMap实现</span><br></pre></td></tr></table></figure>
+<p>extension MyOptional{</p>
+<pre><code>//应用一个返回MyOptional的函数到MyOptional
+func flatMap&lt;U&gt;(f: (T) -&gt; MyOptional&lt;U&gt;) -&gt; MyOptional&lt;U&gt; {
+    switch self {
+    case let .some(a):
+        return f(a)
+    case .none:
+        return .none
+    }
+}   
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#### flatMap使用</span><br></pre></td></tr></table></figure></p>
+<pre><code>//返回MyOptional的函数
+ func plusTree(addend:Int) -&gt; MyOptional &lt;Int&gt; {
+      return  MyOptional&lt;Int&gt;.some(addend + 3)
+  }
+
+  let some = MyOptional.some(2).flatMap(f: plusTree)
+  let none = MyOptional&lt;Int&gt;.none.flatMap(f: plusTree)
+
+  print(some)// output some(5)
+ print(none)// output none
+</code></pre><p>~~~</p>
+<p>至此，通过添加map、apply、flatMap函数，MyOptional分别“遵循Functor、Applicative、Monad协议”。我们可以称MyOptional是Functor/Applicative/Monad。</p>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><ul>
+<li>一个 Functor 就是一种实现了 Functor typeclass（协议） 的数据类型；</li>
+<li>一个 Applicative 就是一种实现了 Applicative typeclass（协议） 的数据类型；</li>
+<li>一个 Monad 就是一种实现了 Monad typeclass（协议）的数据类型。</li>
+</ul>
+<h2 id="相关链接"><a href="#相关链接" class="headerlink" title="相关链接"></a>相关链接</h2><p><a href="http://www.mokacoding.com/blog/functor-applicative-monads-in-pictures/" target="_blank" rel="noopener">Swift Functors, Applicatives, and Monads in Pictures</a><br><a href="http://learnyouahaskell.com/functors-applicative-functors-and-monoids" target="_blank" rel="noopener">Functors, Applicative Functors and Monoids</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ReactiveCocoa/" rel="tag"># ReactiveCocoa</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/13/ ReactiveCocoa------ReactiveCocoa操作详解/" rel="next" title="ReactiveCocoa------ReactiveCocoa操作详解">
+                <i class="fa fa-chevron-left"></i> ReactiveCocoa------ReactiveCocoa操作详解
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/03/ReactiveCocoa------ReactiveCocoa高阶操作/" rel="prev" title="ReactiveCocoa------ReactiveCocoa高阶操作">
+                ReactiveCocoa------ReactiveCocoa高阶操作 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="王凯" />
+            
+              <p class="site-author-name" itemprop="name">王凯</p>
+              <p class="site-description motion-element" itemprop="description">The shortest answer is doing!</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/BossKaiGe" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:angxian66@163.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://blog.csdn.net/uitguyrff" target="_blank" title="CSDN">
+                    
+                      <i class="fa fa-fw fa-instagram"></i>CSDN</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Optional"><span class="nav-number">2.</span> <span class="nav-text">Optional</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Optional-封装后的值"><span class="nav-number">2.1.</span> <span class="nav-text">Optional-封装后的值</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MyOptional"><span class="nav-number">3.</span> <span class="nav-text">MyOptional</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MyOptional定义"><span class="nav-number">3.1.</span> <span class="nav-text">MyOptional定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Functor"><span class="nav-number">3.2.</span> <span class="nav-text">Functor</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#map实现"><span class="nav-number">3.2.1.</span> <span class="nav-text">map实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#map使用"><span class="nav-number">3.2.2.</span> <span class="nav-text">map使用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Applicatives"><span class="nav-number">3.3.</span> <span class="nav-text">Applicatives</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#apply实现"><span class="nav-number">3.3.1.</span> <span class="nav-text">apply实现</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结论"><span class="nav-number">4.</span> <span class="nav-text">结论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关链接"><span class="nav-number">5.</span> <span class="nav-text">相关链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王凯</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
