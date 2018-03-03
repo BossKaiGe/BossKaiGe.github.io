@@ -92,7 +92,7 @@
 <meta property="og:image" content="https://bosskaige.github.io/post_images/if-then-else.png">
 <meta property="og:image" content="https://bosskaige.github.io/post_images/concat1.png">
 <meta property="og:image" content="https://bosskaige.github.io/post_images/Flatten.png">
-<meta property="og:updated_time" content="2018-03-03T08:56:33.000Z">
+<meta property="og:updated_time" content="2018-03-03T09:52:34.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ReactiveCocoa------ReactiveCocoa高阶操作">
 <meta name="twitter:description" content="引言延续上一篇ReactiveCocoa操作详解,本篇笔者围绕针对RAC信号的维度变换（升阶、降阶）进行深入探究，同时在文章结尾给出Functor、Applicatives和Monad的概念。">
@@ -397,7 +397,7 @@
 <h5 id="FlattenMap实现"><a href="#FlattenMap实现" class="headerlink" title="FlattenMap实现"></a>FlattenMap实现</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">RACSignal * signal = @[@1,@2,@3,@0].rac_sequence.signal;</span><br><span class="line"> </span><br><span class="line"> RACSignal * mappedSignal = [signal flattenMap:^RACStream *(NSNumber * value) &#123;</span><br><span class="line">     if (value.integerValue == 0) &#123;</span><br><span class="line">         return [RACSignal error:[NSError errorWithDomain:@&quot;booskai.com&quot; code:-1 userInfo:nil]];</span><br><span class="line">     &#125;else&#123;</span><br><span class="line">         return [RACSignal return:value];</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;];</span><br><span class="line"> </span><br><span class="line"> [mappedSignal subscribeNext:^(id x) &#123;</span><br><span class="line">     NSLog(@&quot;%@&quot;,x); // output 1 2 3</span><br><span class="line"> &#125; error:^(NSError *error) &#123;</span><br><span class="line">     NSLog(@&quot;%@&quot;,error); // Error Domain=bosskai.com Code=-1 &quot;(null)&quot;</span><br><span class="line"> &#125;];</span><br></pre></td></tr></table></figure>
 <p>实际开发中其实有很多类似的需求，FlattenMap也提供了完美的支持。利用FlattenMap可以轻松的完成信号间的转换，而且FlattenMap是支持串行异步操作的。那么为什么说FlattenMap在函数是编程中也是一个重要的概念呢？因为FlattenMap满足Monad。</p>
 <h2 id="Functor、Applicatives和Monad"><a href="#Functor、Applicatives和Monad" class="headerlink" title="Functor、Applicatives和Monad"></a>Functor、Applicatives和Monad</h2><p>Functor、Applicatives和Monad是函数式编程汇总三个非常重要的术语。计算机科学习惯于为抽象概念命名术语，我们也从这些术语中获益良多。这些术语使我们在交流中能够引用抽象概念，并立即使对方知道我们的意思，比如我们从设计模式的共享名称（工厂、装饰器等）中获益良多。其中一些术语非常抽象，如：Functor、Applicatives和Monad。</p>
-<p>本篇中笔者从结论出发让大家有一个大概的印象，在之后的一篇post中会从swift出发为大家做详细剖析。我们可以将Functor、Applicatives和Monad理解为协议，协议内容为满足某种操作。</p>
+<p>本篇中笔者从结论出发让大家有一个大概的印象，在之后的一篇<a href="https://bosskaige.github.io/2018/03/03/ReactiveCocoa------Functor%E3%80%81Applicatives%E5%92%8CMonad/">post</a>中会从swift出发为大家做详细剖析。我们可以将Functor、Applicatives和Monad理解为协议，协议内容为满足某种操作。</p>
 <p>Functor： 应用一个函数到封装后的对象，如RAC中的map。<br>Applicatives：应用一个封装后的函数到一个封装后的对象。RAC并未提供对Applicatives的支持。<br>Monad：应用一个返回封装后的对象的函数到一个封装后的对象。RAC中的flattenMap。</p>
 <p>封装后的对象我们可以理解为，RAC中的Signal、swift中的Optional。有点绕~，先有个概念。</p>
 
@@ -430,8 +430,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/03/03/ReactiveCocoa------Functor、Applicatives和Monad/" rel="next" title="ReactiveCocoa------Functor、Applicatives和Monad">
-                <i class="fa fa-chevron-left"></i> ReactiveCocoa------Functor、Applicatives和Monad
+              <a href="/2018/02/13/ ReactiveCocoa------ReactiveCocoa操作详解/" rel="next" title="ReactiveCocoa------ReactiveCocoa操作详解">
+                <i class="fa fa-chevron-left"></i> ReactiveCocoa------ReactiveCocoa操作详解
               </a>
             
           </div>
@@ -439,6 +439,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/03/ReactiveCocoa------Functor、Applicatives和Monad/" rel="prev" title="ReactiveCocoa------Functor、Applicatives和Monad">
+                ReactiveCocoa------Functor、Applicatives和Monad <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>

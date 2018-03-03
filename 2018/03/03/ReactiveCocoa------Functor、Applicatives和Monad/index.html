@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="Kai&#39;s Blog">
 <meta property="og:description" content="引言计算机科学习惯于为抽象概念命名术语，我们也从这些术语中获益良多。这些术语使我们在交流中能够引用抽象概念，并立即使对方知道我们的意思，比如我们从设计模式的共享名称（工厂、装饰器等）中获益良多。其中一些术语非常抽象，如：函数式编程中的Functor、Applicatives和Monad。 Functor、Applicatives和Monad的概念源自范畴论。本篇笔者从Swift的Optional入">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-03-03T09:48:17.000Z">
+<meta property="og:updated_time" content="2018-03-03T09:52:52.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ReactiveCocoa------Functor、Applicatives和Monad">
 <meta name="twitter:description" content="引言计算机科学习惯于为抽象概念命名术语，我们也从这些术语中获益良多。这些术语使我们在交流中能够引用抽象概念，并立即使对方知道我们的意思，比如我们从设计模式的共享名称（工厂、装饰器等）中获益良多。其中一些术语非常抽象，如：函数式编程中的Functor、Applicatives和Monad。 Functor、Applicatives和Monad的概念源自范畴论。本篇笔者从Swift的Optional入">
@@ -354,6 +354,7 @@
       
         <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>计算机科学习惯于为抽象概念命名术语，我们也从这些术语中获益良多。这些术语使我们在交流中能够引用抽象概念，并立即使对方知道我们的意思，比如我们从设计模式的共享名称（工厂、装饰器等）中获益良多。其中一些术语非常抽象，如：函数式编程中的Functor、Applicatives和Monad。</p>
 <p>Functor、Applicatives和Monad的概念源自范畴论。本篇笔者从Swift的Optional入手阐述Functor、Applicatives和Monad在函数式编程中的概念。对比于OC，swift提供了对函数式编程更好的支持。</p>
+<a id="more"></a>
 <h2 id="Optional"><a href="#Optional" class="headerlink" title="Optional"></a>Optional</h2><p>Apple在WWDC 2014开发者大会上发布了用于Mac OS X和iOS编程的新一代编程语言Swift。Optional（可选值）为Swift中一个重要的概念。</p>
 <h3 id="Optional-封装后的值"><a href="#Optional-封装后的值" class="headerlink" title="Optional-封装后的值"></a>Optional-封装后的值</h3><p>Optional数据类型事实上就是封装后的值，即对值及其上下文环境进行封装的结果。 </p>
 <p>Optional的定义：</p>
@@ -449,8 +450,8 @@ func flatMap&lt;U&gt;(f: (T) -&gt; MyOptional&lt;U&gt;) -&gt; MyOptional&lt;U&gt
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/02/13/ ReactiveCocoa------ReactiveCocoa操作详解/" rel="next" title="ReactiveCocoa------ReactiveCocoa操作详解">
-                <i class="fa fa-chevron-left"></i> ReactiveCocoa------ReactiveCocoa操作详解
+              <a href="/2018/03/03/ReactiveCocoa------ReactiveCocoa高阶操作/" rel="next" title="ReactiveCocoa------ReactiveCocoa高阶操作">
+                <i class="fa fa-chevron-left"></i> ReactiveCocoa------ReactiveCocoa高阶操作
               </a>
             
           </div>
@@ -458,10 +459,6 @@ func flatMap&lt;U&gt;(f: (T) -&gt; MyOptional&lt;U&gt;) -&gt; MyOptional&lt;U&gt
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/03/03/ReactiveCocoa------ReactiveCocoa高阶操作/" rel="prev" title="ReactiveCocoa------ReactiveCocoa高阶操作">
-                ReactiveCocoa------ReactiveCocoa高阶操作 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
