@@ -262,7 +262,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bosskaige.github.io/2017/12/07/算法设计------计算最大公约数（欧几里得算法）/">
+    <link itemprop="mainEntityOfPage" href="https://bosskaige.github.io/2017/12/07/算法设计------扩展欧几里德算法/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="王凯">
@@ -281,7 +281,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2017/12/07/算法设计------计算最大公约数（欧几里得算法）/" itemprop="url">算法设计------计算最大公约数</a></h1>
+                <a class="post-title-link" href="/2017/12/07/算法设计------扩展欧几里德算法/" itemprop="url">算法设计------扩展欧几里德算法</a></h1>
         
 
         <div class="post-meta">
@@ -354,15 +354,14 @@
 
       
         
-          <h2 id="欧几里德算法（辗转相除法）"><a href="#欧几里德算法（辗转相除法）" class="headerlink" title="欧几里德算法（辗转相除法）"></a>欧几里德算法（辗转相除法）</h2><blockquote>
-<p>定理：两个整数的最大公约数等于其中较小的那个数和两数相除余数的最大公约数。最大公约数（Greatest Common Divisor）缩写为GCD。<br>公式：gcd(a,b) = gcd(b,a mod b) (设 a &gt; b )</p>
-</blockquote>
-<h2 id="两个欧几里得的重要结论"><a href="#两个欧几里得的重要结论" class="headerlink" title="两个欧几里得的重要结论"></a>两个欧几里得的重要结论</h2><blockquote>
-<p>gcd(a,b) = gcd(b,a mod b)<br>gcd(a,0) = a</p>
+          <h2 id="扩展欧几里德算法"><a href="#扩展欧几里德算法" class="headerlink" title="扩展欧几里德算法"></a>扩展欧几里德算法</h2><blockquote>
+<p>定义： 扩展欧几里德算法，是欧几里德算法的扩展。已知整数a、b，扩展欧几里德算法可以在求得a、b的最大公约数的同时，能找到整数x、y（其中一个很可能是负数），使它们满足贝祖等式:   </p>
+<pre><code>ax + by = gcd(a,b).     
+</code></pre><p>有两个数a,b，对它们进行辗转相除法，可得它们的最大公约数——这是众所周知的。然后，收集辗转相除法中产生的式子，倒回去，可以得到ax+by=gcd(a,b)的整数解。</p>
 </blockquote>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2017/12/07/算法设计------计算最大公约数（欧几里得算法）/#more" rel="contents">
+            <a class="btn" href="/2017/12/07/算法设计------扩展欧几里德算法/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
