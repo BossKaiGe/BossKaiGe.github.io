@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="ReactiveCocoa," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引言延续上一篇ReactiveCocoa操作详解,本篇笔者围绕针对RAC信号的维度变换（升阶、降阶）进行深入探究，同时在文章结尾给出Functor、Applicatives和Monad的概念。">
+<meta name="keywords" content="ReactiveCocoa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ReactiveCocoa------ReactiveCocoa高阶操作">
+<meta property="og:url" content="https://bosskaige.github.io/2018/03/03/ReactiveCocoa------ReactiveCocoa高阶操作/index.html">
+<meta property="og:site_name" content="Kai&#39;s Blog">
+<meta property="og:description" content="引言延续上一篇ReactiveCocoa操作详解,本篇笔者围绕针对RAC信号的维度变换（升阶、降阶）进行深入探究，同时在文章结尾给出Functor、Applicatives和Monad的概念。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/up-down.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/switchTolatest.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/if-then-else.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/concat1.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/Flatten.png">
+<meta property="og:updated_time" content="2018-03-03T03:48:46.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ReactiveCocoa------ReactiveCocoa高阶操作">
+<meta name="twitter:description" content="引言延续上一篇ReactiveCocoa操作详解,本篇笔者围绕针对RAC信号的维度变换（升阶、降阶）进行深入探究，同时在文章结尾给出Functor、Applicatives和Monad的概念。">
+<meta name="twitter:image" content="https://bosskaige.github.io/post_images/up-down.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://bosskaige.github.io/2018/03/03/ReactiveCocoa------ReactiveCocoa高阶操作/"/>
+
+
+
+
+
+  <title>ReactiveCocoa------ReactiveCocoa高阶操作 | Kai's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Kai's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://bosskaige.github.io/2018/03/03/ReactiveCocoa------ReactiveCocoa高阶操作/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="王凯">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kai's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ReactiveCocoa------ReactiveCocoa高阶操作</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-03T00:00:00+08:00">
+                2018-03-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ReactiveCocoa/" itemprop="url" rel="index">
+                    <span itemprop="name">ReactiveCocoa</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>延续上一篇<a href="https://bosskaige.github.io/2018/02/13/%20ReactiveCocoa------ReactiveCocoa%E6%93%8D%E4%BD%9C%E8%AF%A6%E8%A7%A3/">ReactiveCocoa操作详解</a>,本篇笔者围绕针对RAC信号的维度变换（升阶、降阶）进行深入探究，同时在文章结尾给出Functor、Applicatives和Monad的概念。</p>
+<a id="more"></a>
+<h2 id="升阶-amp-降阶"><a href="#升阶-amp-降阶" class="headerlink" title="升阶 &amp; 降阶"></a>升阶 &amp; 降阶</h2><p>在<a href="https://bosskaige.github.io/2018/02/05/ReactiveCocoa------ReactiveCocoa%E7%AE%80%E4%BB%8B/">ReactiveCocoa简介</a>中，笔者提到类似C语言中的多维数组,RAC中同样存在多维信号的概念。多维信号发送的每一个值都是一个信号，为方便后续交流笔者将其称为“值信号”。本篇中以大写英文字母“A、B、C”表示值信号，以阿拉伯数字“1、2、3”表示普通值。</p>
+<p><img src="/post_images/up-down.png" style="zoom:100%"> </p>
+<h2 id="高阶信号"><a href="#高阶信号" class="headerlink" title="高阶信号"></a>高阶信号</h2><h3 id="高阶信号的创建"><a href="#高阶信号的创建" class="headerlink" title="高阶信号的创建"></a>高阶信号的创建</h3><p>通过return创建一个返回信号的信号。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">RACSignal *signal = [RACSignal return:@1];</span><br><span class="line">	RACSignal *signalHighOrder = [RACSignal return:signal];</span><br></pre></td></tr></table></figure>
+<p>通过map变换返回一个信号，达到对信号升阶的目的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">RACSignal *anotherSignal = [signal map:^id(id value) &#123;</span><br><span class="line">	return [RACSignal return:value];</span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+<h3 id="高阶信号的订阅"><a href="#高阶信号的订阅" class="headerlink" title="高阶信号的订阅"></a>高阶信号的订阅</h3><p>通过嵌套订阅拿到真正的值。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[highOrderSignal subscribeNext:^(RACSignal *aSignal) &#123;</span><br><span class="line">		[aSignal subscribeNext:^(id x) &#123;</span><br><span class="line">			// get real value here.</span><br><span class="line">		&#125;];</span><br><span class="line"> &#125;];</span><br></pre></td></tr></table></figure>
+<h2 id="降阶操作"><a href="#降阶操作" class="headerlink" title="降阶操作"></a>降阶操作</h2><p>通过map升阶将值转换为值信号，在实际应用中最终还是需要获得值。RAC为我们提供了多种降阶操作以满足不同的场景。</p>
+<h3 id="SwitchToLatest"><a href="#SwitchToLatest" class="headerlink" title="SwitchToLatest"></a>SwitchToLatest</h3><p>switchToLatest操作要求原信号必须是一个高阶信号（信号的信号），即信号的值必须是一个信号。switchToLatest将原信号输出的最新的值信号的next事件和error事件作为新信号的next时间和error事件输出。  </p>
+<p>Next事件：输出原信号输出的最新值信号的next事件。<br>Error事件：输出原信号输出的最新值信号的error事件、同时会在原信号输出error事件。<br>Completed事件：取原信号的completed事件和原信号的最后一个值信号的completed事件的在时间维度上较晚发出者。</p>
+<h4 id="图例"><a href="#图例" class="headerlink" title="图例"></a>图例</h4><p><img src="/post_images/switchTolatest.png" style="zoom:100%"> </p>
+<h4 id="Coding"><a href="#Coding" class="headerlink" title="Coding"></a>Coding</h4><p>为突出信号A、B、C在时间维度发送事件的先后顺序，这里使用RACSignal的子类代替RACSubject。RACSubject与RACSignal稍有不同，在后续冷热信号中会详细探讨。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">RACSubject * signalOfSignals = [RACSubject subject];</span><br><span class="line">RACSubject * signalA = [RACSubject subject];</span><br><span class="line">RACSubject * signalB = [RACSubject subject];</span><br><span class="line">RACSubject * signalC = [RACSubject subject];</span><br><span class="line"></span><br><span class="line">[[signalOfSignals switchToLatest] subscribeNext:^(id x) &#123;</span><br><span class="line">    NSLog(@&quot;%@&quot;,x);//output 1 3 5 7 8</span><br><span class="line">&#125;];</span><br><span class="line"></span><br><span class="line">[signalOfSignals sendNext:signalA];</span><br><span class="line">[signalA sendNext:@1];</span><br><span class="line">[signalOfSignals sendNext:signalB];</span><br><span class="line"></span><br><span class="line">[signalA sendNext:@2];</span><br><span class="line">[signalB sendNext:@3];</span><br><span class="line">[signalA sendNext:@4];</span><br><span class="line"></span><br><span class="line">[signalOfSignals sendNext:signalC];</span><br><span class="line">[signalA sendCompleted];</span><br><span class="line">[signalC sendNext:@5];</span><br><span class="line">[signalB sendNext:@6];</span><br><span class="line">[signalB sendCompleted];</span><br><span class="line">[signalOfSignals sendCompleted];</span><br><span class="line">[signalC sendNext:@7];</span><br><span class="line">[signalC sendNext:@8];</span><br><span class="line">[signalC sendCompleted];</span><br></pre></td></tr></table></figure>
+<h3 id="If-then-else"><a href="#If-then-else" class="headerlink" title="If:then:else"></a>If:then:else</h3><p>If:then:else操作基于boolSignal发送的最新值，在tureSignal、falseSignal之间切换。<br>要求boolSignal的值必须为NSNumber类型，且boolSignal、tureSignal、falseSignal均不为nil。<br>If:then:else操作其实是一个语法糖，底层使用switchToLatest实现。  </p>
+<p>Next事件：boolSignal发送ture，输出tureSignal信号的next事件；boolSignal发送false，输出falseSignal信号的next事件。<br>Error事件：boolSignal发送ture，输出tureSignal信号的error事件；boolSignal发送false，输出falseSignal信号的error事件。<br>Completed事件：当boolSignal与当前选中信号都发送completed事件后，发送completed事件。</p>
+<h4 id="图例-1"><a href="#图例-1" class="headerlink" title="图例"></a>图例</h4><p><img src="/post_images/if-then-else.png" style="zoom:100%"> </p>
+<h4 id="Coding-1"><a href="#Coding-1" class="headerlink" title="Coding"></a>Coding</h4><p>为突出时间概念同样使用RACSubject</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">RACSubject * boolSignal = [RACSubject subject];</span><br><span class="line">RACSubject * signalTure = [RACSubject subject];</span><br><span class="line">RACSubject * signalFalse = [RACSubject subject];</span><br><span class="line">RACSignal * resultSignal = [RACSignal if:boolSignal then:signalTure else:signalFalse];</span><br><span class="line"></span><br><span class="line">[resultSignal subscribeNext:^(id x) &#123;</span><br><span class="line">    NSLog(@&quot;%@&quot;,x);//output 1 2 c d 5 6 g h</span><br><span class="line">&#125;];</span><br><span class="line"></span><br><span class="line">[boolSignal sendNext:@YES];</span><br><span class="line">[signalTure sendNext:@1];</span><br><span class="line">[signalTure sendNext:@2];</span><br><span class="line">[signalFalse sendNext:@&quot;a&quot;];</span><br><span class="line">[signalFalse sendNext:@&quot;b&quot;];</span><br><span class="line"></span><br><span class="line">[boolSignal sendNext:@NO];</span><br><span class="line">[signalTure sendNext:@3];</span><br><span class="line">[signalTure sendNext:@4];</span><br><span class="line">[signalFalse sendNext:@&quot;c&quot;];</span><br><span class="line">[signalFalse sendNext:@&quot;d&quot;];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[boolSignal sendNext:@YES];</span><br><span class="line">[signalTure sendNext:@5];</span><br><span class="line">[signalTure sendNext:@6];</span><br><span class="line">[signalFalse sendNext:@&quot;e&quot;];</span><br><span class="line">[signalFalse sendNext:@&quot;f&quot;];</span><br><span class="line"></span><br><span class="line">[boolSignal sendNext:@NO];</span><br><span class="line">[signalTure sendNext:@7];</span><br><span class="line">[signalTure sendNext:@8];</span><br><span class="line">[signalFalse sendNext:@&quot;g&quot;];</span><br><span class="line">[signalFalse sendNext:@&quot;h&quot;];</span><br><span class="line"></span><br><span class="line">[boolSignal sendCompleted];</span><br><span class="line">[signalFalse sendCompleted];</span><br><span class="line">[signalTure sendCompleted];</span><br></pre></td></tr></table></figure>
+<h3 id="Concat"><a href="#Concat" class="headerlink" title="Concat"></a>Concat</h3><p>concat操作要求原信号必须是一个高阶信号（信号的信号），即信号的值必须是一个信号。<br>链接原信号发送的所有值信号,注意与<a href="https://bosskaige.github.io/2018/02/13/%20ReactiveCocoa------ReactiveCocoa%E6%93%8D%E4%BD%9C%E8%AF%A6%E8%A7%A3/">ReactiveCocoa操作详解</a>concat:相区分 。 </p>
+<p>Next事件：依次发送值信号的next事件，在当前订阅值信号发送completed事件后，开始发送下一个值信号的next事件。<br>Error事件：输出值信号的error事件，同时会在原信号输出error事件。<br>Completed事件：原信号和当前订阅值信号均发送completed事件后，输出completed事件。</p>
+<h4 id="图例-2"><a href="#图例-2" class="headerlink" title="图例"></a>图例</h4><p><img src="/post_images/concat1.png" style="zoom:100%"> </p>
+<h4 id="Coding-2"><a href="#Coding-2" class="headerlink" title="Coding"></a>Coding</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">RACSignal * signalOfSignals = [RACSignal createSignal:^RACDisposable *(id&lt;RACSubscriber&gt; subscriber) &#123;</span><br><span class="line">    RACSignal * signalA = [RACSignal createSignal:^RACDisposable *(id&lt;RACSubscriber&gt; subscriber) &#123;</span><br><span class="line">        [subscriber sendNext:@1];</span><br><span class="line">        [subscriber sendNext:@2];</span><br><span class="line">        [subscriber sendNext:@3];</span><br><span class="line">        [subscriber sendNext:@4];</span><br><span class="line">        [subscriber sendCompleted];</span><br><span class="line">        return nil;</span><br><span class="line">    &#125;];</span><br><span class="line">    </span><br><span class="line">    RACSignal * signalB = [[RACSignal createSignal:^RACDisposable *(id&lt;RACSubscriber&gt; subscriber) &#123;</span><br><span class="line">        [subscriber sendNext:@&quot;a&quot;];</span><br><span class="line">        [subscriber sendNext:@&quot;b&quot;];</span><br><span class="line">        [subscriber sendNext:@&quot;c&quot;];</span><br><span class="line">        [subscriber sendNext:@&quot;d&quot;];</span><br><span class="line">        return nil;</span><br><span class="line">    &#125;] deliverOn:[RACScheduler scheduler]] ;</span><br><span class="line">    </span><br><span class="line">    [subscriber sendNext:signalA];</span><br><span class="line">    [subscriber sendNext:signalB];</span><br><span class="line">    return nil;</span><br><span class="line">&#125;];</span><br><span class="line"></span><br><span class="line">[[signalOfSignals concat] subscribeNext:^(id x) &#123;</span><br><span class="line">    NSLog(@&quot;%@&quot;,x);//output 1 2 3 4 a b c d </span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+<h4 id="学以致用"><a href="#学以致用" class="headerlink" title="学以致用"></a>学以致用</h4><p>利用concat实现1秒延时信号</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">RACSignal *signal = @[@1, @3, @7, @9, @8].rac_sequence.signal;</span><br><span class="line">	RACSignal *timerSignal = [[signal map:^id(id value) &#123;</span><br><span class="line"> 		return [[RACSignal return:value] delay:1];</span><br><span class="line">  	&#125;] concat];</span><br></pre></td></tr></table></figure>
+<h3 id="Flatten"><a href="#Flatten" class="headerlink" title="Flatten"></a>Flatten</h3><p>flatten操作要求原信号必须是一个高阶信号（信号的信号），即信号的值必须是一个信号。<br>对原信号进行降阶操作，对原信号输出的值信号输出的所有next事件、error事件作为新信号的事件按时间顺序依次输出。</p>
+<p>Next事件：按时间顺序依次输出原信号的值信号的next事件。<br>Error事件：输出原信号的值信号的error事件。<br>Completed事件：在所有信号均输出completed事件后输出completed事件。</p>
+<h4 id="图例-3"><a href="#图例-3" class="headerlink" title="图例"></a>图例</h4><p><img src="/post_images/Flatten.png" style="zoom:100%"> </p>
+<h4 id="Coding-3"><a href="#Coding-3" class="headerlink" title="Coding"></a>Coding</h4><p>为突出时间概念同样使用RACSubject</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">RACSubject * signalOfSignals = [RACSubject subject];</span><br><span class="line">RACSubject * signalA = [RACSubject subject];</span><br><span class="line">RACSubject * signalB = [RACSubject subject];</span><br><span class="line">RACSubject * signalC = [RACSubject subject];</span><br><span class="line"></span><br><span class="line">[[signalOfSignals flatten] subscribeNext:^(id x) &#123;</span><br><span class="line">    NSLog(@&quot;%@&quot;,x);//output 1 3 5 7 8</span><br><span class="line">&#125;];</span><br><span class="line"></span><br><span class="line">[signalOfSignals sendNext:signalA];</span><br><span class="line">[signalA sendNext:@1];</span><br><span class="line">[signalOfSignals sendNext:signalB];</span><br><span class="line"></span><br><span class="line">[signalA sendNext:@2];</span><br><span class="line">[signalB sendNext:@3];</span><br><span class="line">[signalA sendNext:@4];</span><br><span class="line"></span><br><span class="line">[signalOfSignals sendNext:signalC];</span><br><span class="line">[signalA sendCompleted];</span><br><span class="line">[signalC sendNext:@5];</span><br><span class="line">[signalB sendNext:@6];</span><br><span class="line">[signalB sendCompleted];</span><br><span class="line">[signalOfSignals sendCompleted];</span><br><span class="line">[signalC sendNext:@7];</span><br><span class="line">[signalC sendNext:@8];</span><br><span class="line">[signalC sendCompleted];</span><br></pre></td></tr></table></figure>
+<h2 id="FlattenMap"><a href="#FlattenMap" class="headerlink" title="FlattenMap"></a>FlattenMap</h2><p>不止局限于RAC（例如：RxJava），flattenMap在整个函数式编程中也是一个重要的概念。以字面理解flattenMap是flatten操作和map操作的结合，事实上也的确如此。</p>
+<h3 id="Flatten-amp-amp-Map"><a href="#Flatten-amp-amp-Map" class="headerlink" title="Flatten &amp;&amp; Map"></a>Flatten &amp;&amp; Map</h3><p>flattenMap的本质是map然后flatten：它首先利用map将值映射为信号（升阶），然后利用flatten进行降阶。这里只是说明功能，flattenMap的实现并不是通过调用map+flatten实现的。实质上flattenMap的map是通过在block生成中间信号M，flatten是在内部对中间信号进行订阅实现的。后续会对RAC源码进行更深入探究，这里只说明功能。</p>
+<h4 id="举个栗子"><a href="#举个栗子" class="headerlink" title="举个栗子"></a>举个栗子</h4><p>考虑将一个无效值转换为error事件，不止局限于理论在实际开发中我们也经常碰到这样的需求。</p>
+<h5 id="Flatten-amp-amp-Map组合实现"><a href="#Flatten-amp-amp-Map组合实现" class="headerlink" title="Flatten &amp;&amp; Map组合实现"></a>Flatten &amp;&amp; Map组合实现</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">RACSignal * signal = @[@1,@2,@3,@0].rac_sequence.signal;</span><br><span class="line"></span><br><span class="line">RACSignal * mappedSignal = [[signal map:^id(NSNumber * value) &#123;</span><br><span class="line">    if (value.integerValue == 0) &#123;</span><br><span class="line">        return [RACSignal error:[NSError errorWithDomain:@&quot;bosskai.com&quot; code:-1 userInfo:nil]];</span><br><span class="line">    &#125;else&#123;</span><br><span class="line">        return [RACSignal return:value];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;]flatten] ;</span><br><span class="line"></span><br><span class="line">[mappedSignal subscribeNext:^(id x) &#123;</span><br><span class="line">    NSLog(@&quot;%@&quot;,x); // output 1 2 3</span><br><span class="line">&#125; error:^(NSError *error) &#123;</span><br><span class="line">    NSLog(@&quot;%@&quot;,error); // Error Domain=bosskai.com Code=-1 &quot;(null)&quot;</span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+<h5 id="FlattenMap实现"><a href="#FlattenMap实现" class="headerlink" title="FlattenMap实现"></a>FlattenMap实现</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">RACSignal * signal = @[@1,@2,@3,@0].rac_sequence.signal;</span><br><span class="line"> </span><br><span class="line"> RACSignal * mappedSignal = [signal flattenMap:^RACStream *(NSNumber * value) &#123;</span><br><span class="line">     if (value.integerValue == 0) &#123;</span><br><span class="line">         return [RACSignal error:[NSError errorWithDomain:@&quot;booskai.com&quot; code:-1 userInfo:nil]];</span><br><span class="line">     &#125;else&#123;</span><br><span class="line">         return [RACSignal return:value];</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;];</span><br><span class="line"> </span><br><span class="line"> [mappedSignal subscribeNext:^(id x) &#123;</span><br><span class="line">     NSLog(@&quot;%@&quot;,x); // output 1 2 3</span><br><span class="line"> &#125; error:^(NSError *error) &#123;</span><br><span class="line">     NSLog(@&quot;%@&quot;,error); // Error Domain=bosskai.com Code=-1 &quot;(null)&quot;</span><br><span class="line"> &#125;];</span><br></pre></td></tr></table></figure>
+<p>实际开发中其实有很多类似的需求，FlattenMap也提供了完美的支持。利用FlattenMap可以轻松的完成信号间的转换，而且FlattenMap是支持串行异步操作的。那么为什么说FlattenMap在函数是编程中也是一个重要的概念呢？因为FlattenMap满足Monad。</p>
+<h2 id="Functor、Applicatives和Monad"><a href="#Functor、Applicatives和Monad" class="headerlink" title="Functor、Applicatives和Monad"></a>Functor、Applicatives和Monad</h2><p>Functor、Applicatives和Monad是函数式编程汇总三个非常重要的术语。计算机科学习惯于为抽象概念命名术语，我们也从这些术语中获益良多。这些术语使我们在交流中能够引用抽象概念，并立即使对方知道我们的意思，比如我们从设计模式的共享名称（工厂、装饰器等）中获益良多。其中一些术语非常抽象，如：Functor、Applicatives和Monad。</p>
+<p>本篇中笔者从结论出发让大家有一个大概的印象，在之后的一篇post中会从swift出发为大家做详细剖析。我们可以将Functor、Applicatives和Monad理解为协议，协议内容为满足某种操作。</p>
+<p>Functor： 应用一个方法到封装后的对象，如RAC中的map。<br>Applicatives：引用一个封装后的方法到一个封装后的对象。RAC并未提供对Applicatives的支持。<br>Monad：应用一个返回封装后的对象的方法到一个封装后的对象。RAC中的flattenMap。</p>
+<p>封装后的对象我们可以理解为，RAC中的Signal、swift中的Optional。有点绕~，先有个概念。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ReactiveCocoa/" rel="tag"># ReactiveCocoa</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/13/ ReactiveCocoa------ReactiveCocoa操作详解/" rel="next" title="ReactiveCocoa------ReactiveCocoa操作详解">
+                <i class="fa fa-chevron-left"></i> ReactiveCocoa------ReactiveCocoa操作详解
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="王凯" />
+            
+              <p class="site-author-name" itemprop="name">王凯</p>
+              <p class="site-description motion-element" itemprop="description">The shortest answer is doing!</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/BossKaiGe" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:angxian66@163.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://blog.csdn.net/uitguyrff" target="_blank" title="CSDN">
+                    
+                      <i class="fa fa-fw fa-instagram"></i>CSDN</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#升阶-amp-降阶"><span class="nav-number">2.</span> <span class="nav-text">升阶 & 降阶</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#高阶信号"><span class="nav-number">3.</span> <span class="nav-text">高阶信号</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#高阶信号的创建"><span class="nav-number">3.1.</span> <span class="nav-text">高阶信号的创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#高阶信号的订阅"><span class="nav-number">3.2.</span> <span class="nav-text">高阶信号的订阅</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#降阶操作"><span class="nav-number">4.</span> <span class="nav-text">降阶操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SwitchToLatest"><span class="nav-number">4.1.</span> <span class="nav-text">SwitchToLatest</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#图例"><span class="nav-number">4.1.1.</span> <span class="nav-text">图例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Coding"><span class="nav-number">4.1.2.</span> <span class="nav-text">Coding</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#If-then-else"><span class="nav-number">4.2.</span> <span class="nav-text">If:then:else</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#图例-1"><span class="nav-number">4.2.1.</span> <span class="nav-text">图例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Coding-1"><span class="nav-number">4.2.2.</span> <span class="nav-text">Coding</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Concat"><span class="nav-number">4.3.</span> <span class="nav-text">Concat</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#图例-2"><span class="nav-number">4.3.1.</span> <span class="nav-text">图例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Coding-2"><span class="nav-number">4.3.2.</span> <span class="nav-text">Coding</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#学以致用"><span class="nav-number">4.3.3.</span> <span class="nav-text">学以致用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Flatten"><span class="nav-number">4.4.</span> <span class="nav-text">Flatten</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#图例-3"><span class="nav-number">4.4.1.</span> <span class="nav-text">图例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Coding-3"><span class="nav-number">4.4.2.</span> <span class="nav-text">Coding</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FlattenMap"><span class="nav-number">5.</span> <span class="nav-text">FlattenMap</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Flatten-amp-amp-Map"><span class="nav-number">5.1.</span> <span class="nav-text">Flatten && Map</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#举个栗子"><span class="nav-number">5.1.1.</span> <span class="nav-text">举个栗子</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Flatten-amp-amp-Map组合实现"><span class="nav-number">5.1.1.1.</span> <span class="nav-text">Flatten && Map组合实现</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#FlattenMap实现"><span class="nav-number">5.1.1.2.</span> <span class="nav-text">FlattenMap实现</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Functor、Applicatives和Monad"><span class="nav-number">6.</span> <span class="nav-text">Functor、Applicatives和Monad</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王凯</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
