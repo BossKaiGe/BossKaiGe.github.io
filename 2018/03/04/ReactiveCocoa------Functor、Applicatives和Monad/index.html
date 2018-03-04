@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="Kai&#39;s Blog">
 <meta property="og:description" content="引言计算机科学习惯于为抽象概念命名术语，我们也从这些术语中获益良多。这些术语使我们在交流中能够引用抽象概念，并立即使对方知道我们的意思，比如我们从设计模式的共享名称（工厂、装饰器等）中获益良多。其中一些术语非常抽象，如：函数式编程中的Functor、Applicatives和Monad。 Functor、Applicatives和Monad的概念源自范畴论。本篇笔者从Swift的Optional入">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-03-03T09:53:41.000Z">
+<meta property="og:updated_time" content="2018-03-04T09:31:57.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ReactiveCocoa------Functor、Applicatives和Monad">
 <meta name="twitter:description" content="引言计算机科学习惯于为抽象概念命名术语，我们也从这些术语中获益良多。这些术语使我们在交流中能够引用抽象概念，并立即使对方知道我们的意思，比如我们从设计模式的共享名称（工厂、装饰器等）中获益良多。其中一些术语非常抽象，如：函数式编程中的Functor、Applicatives和Monad。 Functor、Applicatives和Monad的概念源自范畴论。本篇笔者从Swift的Optional入">
@@ -377,7 +377,7 @@
 </blockquote>
 <p>函数式编程中函数是一等公民，我们可以将值与其上下文进行封装，同样我们也可以将函数与其上下文进行封装。  </p>
 <p>添加apply函数，应用函数到MyOptional对象，使MyOptional满足Applicatives。 </p>
-<h4 id="apply实现"><a href="#apply实现" class="headerlink" title="apply实现"></a>apply实现</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">extension MyOperation&#123;</span><br><span class="line">    //应用一个封装过的函数到MyOperation</span><br><span class="line">    func apply&lt;U&gt;(f:(MyOperation&lt;(T)-&gt;U&gt;))-&gt; MyOperation&lt;U&gt; &#123;</span><br><span class="line">        switch f &#123;</span><br><span class="line">        case let .some(someF):</span><br><span class="line">            return self.map(f: someF)</span><br><span class="line">        case .none:</span><br><span class="line">            return .none</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br><span class="line">~~~ </span><br><span class="line"></span><br><span class="line">#### apply使用</span><br></pre></td></tr></table></figure>
+<h4 id="apply实现"><a href="#apply实现" class="headerlink" title="apply实现"></a>apply实现</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">extension MyOperation&#123;</span><br><span class="line">    //应用一个封装过的函数到MyOperation</span><br><span class="line">    func apply&lt;U&gt;(f:(MyOperation&lt;(T)-&gt;U&gt;))-&gt; MyOperation&lt;U&gt; &#123;</span><br><span class="line">        switch f &#123;</span><br><span class="line">        case let .some(someF):</span><br><span class="line">            return self.map(f: someF)</span><br><span class="line">        case .none:</span><br><span class="line">            return .none</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">~~~ </span><br><span class="line"></span><br><span class="line">#### apply使用</span><br></pre></td></tr></table></figure>
 <pre><code> func plusTree(addend:Int) -&gt; Int {
        return  addend + 3
   }
@@ -401,7 +401,8 @@ func flatMap&lt;U&gt;(f: (T) -&gt; MyOptional&lt;U&gt;) -&gt; MyOptional&lt;U&gt
         return .none
     }
 }   
-</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#### flatMap使用</span><br></pre></td></tr></table></figure></p>
+</code></pre><p>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#### flatMap使用</span><br></pre></td></tr></table></figure>
 <pre><code>//返回MyOptional的函数
  func plusTree(addend:Int) -&gt; MyOptional &lt;Int&gt; {
       return  MyOptional&lt;Int&gt;.some(addend + 3)
