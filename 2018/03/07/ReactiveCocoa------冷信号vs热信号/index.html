@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="Kai&#39;s Blog">
 <meta property="og:description" content="冷热信号的概念是源自于源于.NET框架Reactive Extensions(RX)中的Hot Observable和Cold Observable，两者的区别是：   Hot Observable是主动的，尽管你并没有订阅事件，但是它会时刻推送，就像鼠标移动；而Cold Observable是被动的，只有当你订阅的时候，它才会发布消息。 Hot Observable可以有多个订阅者，是一对多，集">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-03-07T05:21:42.000Z">
+<meta property="og:updated_time" content="2018-03-07T06:07:32.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ReactiveCocoa------冷信号vs热信号">
 <meta name="twitter:description" content="冷热信号的概念是源自于源于.NET框架Reactive Extensions(RX)中的Hot Observable和Cold Observable，两者的区别是：   Hot Observable是主动的，尽管你并没有订阅事件，但是它会时刻推送，就像鼠标移动；而Cold Observable是被动的，只有当你订阅的时候，它才会发布消息。 Hot Observable可以有多个订阅者，是一对多，集">
@@ -359,6 +359,7 @@
 <li>Hot Observable可以有多个订阅者，是一对多，集合可以与订阅者共享信息；而Cold Observable只能一对一，当有不同的订阅者，消息是重新完整发送。</li>
 </ol>
 </blockquote>
+<a id="more"></a>
 <p>冷热信号分别对应RAC中的RACSignal和RACSubject，RACSubject是RACSignal的子类。本文中笔者将从示例代码引入RACSignal（冷信号）在实际应用中的问题及RACSubject的使用，通过剖析RACSubject的源码，阐述冷热信号的概念及RACSubject的实现。</p>
 <h2 id="懒惰的RACSignal"><a href="#懒惰的RACSignal" class="headerlink" title="懒惰的RACSignal"></a>懒惰的RACSignal</h2><p>笔者<a href="https://bosskaige.github.io/2018/02/04/ReactiveCocoa------%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E5%88%9D%E6%8E%A2/">函数式编程</a>提到了惰性求值的概念:</p>
 <blockquote>

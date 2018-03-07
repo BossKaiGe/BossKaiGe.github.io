@@ -354,60 +354,20 @@
 
       
         
-          
-            <p>冷热信号的概念是源自于源于.NET框架Reactive Extensions(RX)中的Hot Observable和Cold Observable，两者的区别是：</p>
+          <p>冷热信号的概念是源自于源于.NET框架Reactive Extensions(RX)中的Hot Observable和Cold Observable，两者的区别是：</p>
 <blockquote>
 <ol>
 <li>Hot Observable是主动的，尽管你并没有订阅事件，但是它会时刻推送，就像鼠标移动；而Cold Observable是被动的，只有当你订阅的时候，它才会发布消息。</li>
 <li>Hot Observable可以有多个订阅者，是一对多，集合可以与订阅者共享信息；而Cold Observable只能一对一，当有不同的订阅者，消息是重新完整发送。</li>
 </ol>
 </blockquote>
-<p>冷热信号分别对应RAC中的RACSignal和RACSubject，RACSubject是RACSignal的子类。本文中笔者将从示例代码引入RACSignal（冷信号）在实际应用中的问题及RACSubject的使用，通过剖析RACSubject的源码，阐述冷热信号的概念及RACSubject的实现。</p>
-<h2 id="懒惰的RACSignal"><a href="#懒惰的RACSignal" class="headerlink" title="懒惰的RACSignal"></a>懒惰的RACSignal</h2><p>笔者<a href="https://bosskaige.github.io/2018/02/04/ReactiveCocoa------%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E5%88%9D%E6%8E%A2/">函数式编程</a>提到了惰性求值的概念:</p>
-<blockquote>
-<p>惰性求值（尽可能延迟表达式求值），表达式不会在它被绑定到变量之后就立即求值，而是在该值被取用的时候求值。</p>
-</blockquote>
-<p>RACSignal就是惰性求值的。RACSignal的didSubscribe block只有在RACSignal被订阅的时候才会被执行，而且每次订阅RACSignal都会执行一遍didSubscribe block。也正是这个特性赋予了RACSignal冷信号的特点。同时，RACSignal的这些特点也导致了其在实际应用中的一些问题。</p>
-<h3 id="举个栗子"><a href="#举个栗子" class="headerlink" title="举个栗子"></a>举个栗子</h3><p>一起看以下示例代码</p>
-<h4 id="示例一：RACSignal-amp-副作用"><a href="#示例一：RACSignal-amp-副作用" class="headerlink" title="示例一：RACSignal &amp; 副作用"></a>示例一：RACSignal &amp; 副作用</h4><p>以下代码在didSubscribe中引入副作用”i += 1“，通过Output可以看出这种情况下对同一个信号多次订阅拿到不同的值，这显然是我们不想看到的。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">__block int i = 0;</span><br><span class="line">RACSignal * signal = [RACSignal createSignal:^RACDisposable *(id&lt;RACSubscriber&gt; subscriber) &#123;</span><br><span class="line">    i += 1;</span><br><span class="line">    [subscriber sendNext:@(i)];</span><br><span class="line">    [subscriber sendCompleted];</span><br><span class="line">    return nil;</span><br><span class="line">&#125;];</span><br><span class="line"></span><br><span class="line">[signal subscribeNext:^(id x) &#123;</span><br><span class="line">    NSLog(@&quot;subscriber1---recived---%@&quot;,x);</span><br><span class="line">&#125;];</span><br><span class="line">[signal subscribeNext:^(id x) &#123;</span><br><span class="line">    NSLog(@&quot;subscriber2---recived---%@&quot;,x);</span><br><span class="line">&#125;];</span><br><span class="line">[signal subscribeNext:^(id x) &#123;</span><br><span class="line">    NSLog(@&quot;subscriber3---recived---%@&quot;,x);</span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
-<p>Output</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">2018-03-04 18:53:38.660673+0800 RACDemo[98599:6473410] subscriber1---recived---1</span><br><span class="line">2018-03-04 18:53:38.661029+0800 RACDemo[98599:6473410] subscriber2---recived---2</span><br><span class="line">2018-03-04 18:53:38.661184+0800 RACDemo[98599:6473410] subscriber3---recived---3</span><br></pre></td></tr></table></figure>
-<h4 id="RACSignal-amp-时间"><a href="#RACSignal-amp-时间" class="headerlink" title="RACSignal &amp;  时间"></a>RACSignal &amp;  时间</h4><p>以下代码signal以1秒的间隔依次发送1，2，3。subscriber1立即订阅signal（signal未发送任何值之前），subscribe2在3.1秒后（signal将所有值发送完毕后）订阅signal。在不同时间订同一信号获取的结果是一样的。通过Output可以看出在任意时间点订阅signal，signal都会以1秒的间隔依次发送1，2，3。很多情况下，这同样不是我们想看到的，subscribe2只关心signal在3.1秒之后发送的值。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">RACSignal * signal = [RACSignal createSignal:^RACDisposable *(id&lt;RACSubscriber&gt; subscriber) &#123;</span><br><span class="line">    [[RACScheduler mainThreadScheduler] afterDelay:1 schedule:^&#123;</span><br><span class="line">        [subscriber sendNext:@1];</span><br><span class="line">    &#125;];</span><br><span class="line">    [[RACScheduler mainThreadScheduler] afterDelay:2 schedule:^&#123;</span><br><span class="line">        [subscriber sendNext:@2];</span><br><span class="line">    &#125;];</span><br><span class="line">    [[RACScheduler mainThreadScheduler] afterDelay:3 schedule:^&#123;</span><br><span class="line">        [subscriber sendNext:@3];</span><br><span class="line">    &#125;];</span><br><span class="line">    return nil;</span><br><span class="line">&#125;];</span><br><span class="line"></span><br><span class="line">[signal subscribeNext:^(id x) &#123;</span><br><span class="line">    NSLog(@&quot;subscribe1----recieve-%@&quot;,x);</span><br><span class="line">&#125;];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[[RACScheduler mainThreadScheduler] afterDelay:3.1 schedule:^&#123;</span><br><span class="line">    [signal subscribeNext:^(id x) &#123;</span><br><span class="line">        NSLog(@&quot;subscribe2----recieve-%@&quot;,x);</span><br><span class="line">    &#125;];</span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
-<p>Output  </p>
-<p>注意时间  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">2018-03-04 18:58:21.864222+0800 RACDemo[98639:6481792] subscribe1----recieve-1</span><br><span class="line">2018-03-04 18:58:22.863358+0800 RACDemo[98639:6481792] subscribe1----recieve-2</span><br><span class="line">2018-03-04 18:58:23.963592+0800 RACDemo[98639:6481792] subscribe1----recieve-3</span><br><span class="line">2018-03-04 18:58:24.967656+0800 RACDemo[98639:6481792] subscribe2----recieve-1</span><br><span class="line">2018-03-04 18:58:25.964144+0800 RACDemo[98639:6481792] subscribe2----recieve-2</span><br><span class="line">2018-03-04 18:58:26.967526+0800 RACDemo[98639:6481792] subscribe2----recieve-3</span><br></pre></td></tr></table></figure>
-<p>结合在懒惰的RACSignal中提到RACSignal的特点。不难理解，示例一、示例二所展示的结果正式由于RACSignal的惰性求值及每次订阅重复调用didSubscribe block导致的。</p>
-<h2 id="RACSubject"><a href="#RACSubject" class="headerlink" title="RACSubject"></a>RACSubject</h2><p>我们对示例二的代码进行一个小的改动,创建热信号subject,subject订阅signal，subscriber订阅subject不再直接订阅signal。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">RACSignal * signal = [RACSignal createSignal:^RACDisposable *(id&lt;RACSubscriber&gt; subscriber) &#123;</span><br><span class="line">    [[RACScheduler mainThreadScheduler] afterDelay:1 schedule:^&#123;</span><br><span class="line">        [subscriber sendNext:@1];</span><br><span class="line">    &#125;];</span><br><span class="line">    [[RACScheduler mainThreadScheduler] afterDelay:2 schedule:^&#123;</span><br><span class="line">        [subscriber sendNext:@2];</span><br><span class="line">    &#125;];</span><br><span class="line">    [[RACScheduler mainThreadScheduler] afterDelay:3 schedule:^&#123;</span><br><span class="line">        [subscriber sendNext:@3];</span><br><span class="line">    &#125;];</span><br><span class="line">    return nil;</span><br><span class="line">&#125;];</span><br><span class="line"></span><br><span class="line">RACSubject * subject = [RACSubject subject];</span><br><span class="line">[signal subscribe:subject];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[subject subscribeNext:^(id x) &#123;</span><br><span class="line">    NSLog(@&quot;subject subscriber1----recieve-%@&quot;,x);</span><br><span class="line">&#125;];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[[RACScheduler mainThreadScheduler] afterDelay:3.1 schedule:^&#123;</span><br><span class="line">    [subject subscribeNext:^(id x) &#123;</span><br><span class="line">        NSLog(@&quot;subject subscriber2----recieve-%@&quot;,x);</span><br><span class="line">    &#125;];</span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
-<p>Output</p>
-<p>以前来看看发生了啥</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">2018-03-05 13:30:38.591185+0800 RACDemo[11918:7623749] subject subscriber1----recieve-1</span><br><span class="line">2018-03-05 13:30:39.590616+0800 RACDemo[11918:7623749] subject subscriber1----recieve-2</span><br><span class="line">2018-03-05 13:30:40.689946+0800 RACDemo[11918:7623749] subject subscriber1----recieve-3</span><br></pre></td></tr></table></figure>
-<h3 id="RACSubject的实现"><a href="#RACSubject的实现" class="headerlink" title="RACSubject的实现"></a>RACSubject的实现</h3><p>RACSubject是RACSignal的子类。相比于RACSignal丰富的头文件，RACSubject对外的接口并没有提供太多方法：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@interface RACSubject : RACSignal &lt;RACSubscriber&gt;</span><br><span class="line">+ (instancetype)subject;</span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
-<p>RACSubject的特性主要由subscribers订阅者数组和RACSubscriber协议提供。</p>
-<h4 id="subscribers订阅者数组"><a href="#subscribers订阅者数组" class="headerlink" title="subscribers订阅者数组"></a>subscribers订阅者数组</h4><p>RACSubject维护了一个订阅者数组，每当有新的订阅者产生，都会将传入的 id<racsubscriber> 对象加入数组：</racsubscriber></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">- (RACDisposable *)subscribe:(id&lt;RACSubscriber&gt;)subscriber &#123;</span><br><span class="line">        RACCompoundDisposable *disposable = [RACCompoundDisposable compoundDisposable];</span><br><span class="line">        subscriber = [[RACPassthroughSubscriber alloc] initWithSubscriber:subscriber signal:self disposable:disposable];</span><br><span class="line"></span><br><span class="line">        NSMutableArray *subscribers = self.subscribers;</span><br><span class="line">        @synchronized (subscribers) &#123;</span><br><span class="line">                [subscribers addObject:subscriber];</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        [disposable addDisposable:[RACDisposable disposableWithBlock:^&#123;</span><br><span class="line">                @synchronized (subscribers) &#123;</span><br><span class="line">                        NSUInteger index = [subscribers indexOfObjectWithOptions:NSEnumerationReverse passingTest:^ BOOL (id&lt;RACSubscriber&gt; obj, NSUInteger index, BOOL *stop) &#123;</span><br><span class="line">                                return obj == subscriber;</span><br><span class="line">                        &#125;];</span><br><span class="line"></span><br><span class="line">                        if (index != NSNotFound) [subscribers removeObjectAtIndex:index];</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;]];</span><br><span class="line"></span><br><span class="line">        return disposable;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>订阅的过程分为三个部分：</p>
-<ol>
-<li>初始化一个 RACPassthroughSubscriber 实例；</li>
-<li>将subscriber加入RACSubject持有的数组中；</li>
-<li>创建一个RACDisposable对象，在当前subscriber销毁时，将自身从数组中移除。</li>
-</ol>
-<p>订阅者数组，为RACSubject提供了一对多的能力。事件发生时RACSubject通过实现RACSubscriber协议提供的方法，遍历subscribers数组逐个发送消息。</p>
-<h4 id="RACSubscriber协议"><a href="#RACSubscriber协议" class="headerlink" title="RACSubscriber协议"></a>RACSubscriber协议</h4><p>RACSubscriber协议为RACSubject提供了在创建成功后向订阅者继续发送消息的能力，RACSignal只能通过创建信号的didSubscribe block遵循该协议的subscriber发送消息。所以我们可以说，RACSignal是不可变的，RACSubject是可变的。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">@protocol RACSubscriber &lt;NSObject&gt;</span><br><span class="line">@required</span><br><span class="line"></span><br><span class="line">- (void)sendNext:(nullable id)value;</span><br><span class="line">- (void)sendError:(nullable NSError *)error;</span><br><span class="line">- (void)sendCompleted;</span><br><span class="line">- (void)didSubscribeWithDisposable:(RACCompoundDisposable *)disposable;</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">- (void)sendNext:(id)value &#123;</span><br><span class="line">        [self enumerateSubscribersUsingBlock:^(id&lt;RACSubscriber&gt; subscriber) &#123;</span><br><span class="line">                [subscriber sendNext:value];</span><br><span class="line">        &#125;];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)sendError:(NSError *)error &#123;</span><br><span class="line">        [self.disposable dispose];</span><br><span class="line"></span><br><span class="line">        [self enumerateSubscribersUsingBlock:^(id&lt;RACSubscriber&gt; subscriber) &#123;</span><br><span class="line">                [subscriber sendError:error];</span><br><span class="line">        &#125;];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)sendCompleted &#123;</span><br><span class="line">        [self.disposable dispose];</span><br><span class="line"></span><br><span class="line">        [self enumerateSubscribersUsingBlock:^(id&lt;RACSubscriber&gt; subscriber) &#123;</span><br><span class="line">                [subscriber sendCompleted];</span><br><span class="line">        &#125;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>RACSubject实现相对简单。类似于通知，通过维护订阅者数组在事件发生后为所有订阅者发送消息。在具体的编码过程中加入了一些锁用以避免线程竞争。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此，结合Hot Observable和Cold Observable。我们不难理解，冷信号就好像看录像，热信号就好像是看直播。</p>
-<blockquote>
-<p>冷信号（看录像）<br>不可变：RACSignal创建后，将要发送的消息就是固定的。（录像录制完成后内容就是固定的）<br>一对一：当有不同的订阅者，RACSignal会重复发送所有消息。(为每一个观看者重复播放录像)<br>被动的：只有订阅者订阅的时候，才会发送消息。（没有人要求观看时不会播放录像）</p>
-<p>热信号（看直播）<br>可变：RACSubject创建后，可以持续添加新事件。（直播总会有新的事情发生）<br>一对多：所有订阅者共享同一个RACSubject。（只有一个主播）<br>主动的：无论是否有订阅者，都会发送新事件。（有没有人看主播都会播）</p>
-</blockquote>
-<h2 id="相关链接"><a href="#相关链接" class="headerlink" title="相关链接"></a>相关链接</h2><p><a href="http://williamzang.com/blog/2015/08/18/talk-about-reactivecocoas-cold-signal-and-hot-signal/" target="_blank" rel="noopener">细说ReactiveCocoa的冷信号与热信号</a><br><a href="https://spin.atomicobject.com/2014/06/29/replay-replaylast-replaylazily/" target="_blank" rel="noopener">Comparing replay, replayLast, and replayLazily</a></p>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/03/07/ReactiveCocoa------冷信号vs热信号/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1502,153 +1462,6 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bosskaige.github.io/2017/12/24/算法设计——Dynamic Pragraming Tri Tiling/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="王凯">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Kai's Blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/12/24/算法设计——Dynamic Pragraming Tri Tiling/" itemprop="url">算法设计------Dynamic Pragraming Tri Tiling</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-24T00:00:00+08:00">
-                2017-12-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/算法设计/" itemprop="url" rel="index">
-                    <span itemprop="name">算法设计</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>用1 x 2的骨牌放满3 x n的矩形有多少种方法 <br><br>例如：下面是铺满3 x 12的一个方法</p>
-<p><img src="/post_images/Tri_Tiling.png" style="zoom:100%"></p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/12/24/算法设计——Dynamic Pragraming Tri Tiling/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://bosskaige.github.io/2017/12/24/算法设计------Dynamic Pragraming Longest Common Subsequence/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1746,6 +1559,153 @@
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/12/24/算法设计------Dynamic Pragraming Longest Common Subsequence/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://bosskaige.github.io/2017/12/24/算法设计——Dynamic Pragraming Tri Tiling/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="王凯">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kai's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/12/24/算法设计——Dynamic Pragraming Tri Tiling/" itemprop="url">算法设计------Dynamic Pragraming Tri Tiling</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-24T00:00:00+08:00">
+                2017-12-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/算法设计/" itemprop="url" rel="index">
+                    <span itemprop="name">算法设计</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>用1 x 2的骨牌放满3 x n的矩形有多少种方法 <br><br>例如：下面是铺满3 x 12的一个方法</p>
+<p><img src="/post_images/Tri_Tiling.png" style="zoom:100%"></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/12/24/算法设计——Dynamic Pragraming Tri Tiling/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
