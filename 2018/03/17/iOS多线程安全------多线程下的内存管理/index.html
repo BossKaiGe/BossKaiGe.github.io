@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="引言在继续深入之前一起来考虑几个问题：  64/32位操作系统，64/32指的是什么？ OC中标量类型属性修饰符为什么是assign？ i++是原子操作么？ atomic保障了什么？  CPU的寻址操作我们知道，CPU是通过地址总线寻址，然后通过数据总线存取数据的。 地址总线地址总线的位数决定CPU的寻址范围，若CPU">
+<meta name="description" content="引言在继续深入之前一起来考虑几个问题：  64/32位操作系统，64/32指的是什么？ OC中标量类型属性修饰符为什么是assign？ i++是原子操作么？ atomic保障了什么？">
 <meta name="keywords" content="多线程">
 <meta property="og:type" content="article">
 <meta property="og:title" content="iOS多线程安全------多线程下的内存管理">
 <meta property="og:url" content="https://bosskaige.github.io/2018/03/17/iOS多线程安全------多线程下的内存管理/index.html">
 <meta property="og:site_name" content="Kai&#39;s Blog">
-<meta property="og:description" content="引言在继续深入之前一起来考虑几个问题：  64/32位操作系统，64/32指的是什么？ OC中标量类型属性修饰符为什么是assign？ i++是原子操作么？ atomic保障了什么？  CPU的寻址操作我们知道，CPU是通过地址总线寻址，然后通过数据总线存取数据的。 地址总线地址总线的位数决定CPU的寻址范围，若CPU的地址总线宽度是32位，那么CPU的寻址范围是4GB，所以最多支持4G内存。 数">
+<meta property="og:description" content="引言在继续深入之前一起来考虑几个问题：  64/32位操作系统，64/32指的是什么？ OC中标量类型属性修饰符为什么是assign？ i++是原子操作么？ atomic保障了什么？">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-05-18T14:49:59.000Z">
+<meta property="og:updated_time" content="2018-06-08T23:52:41.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS多线程安全------多线程下的内存管理">
-<meta name="twitter:description" content="引言在继续深入之前一起来考虑几个问题：  64/32位操作系统，64/32指的是什么？ OC中标量类型属性修饰符为什么是assign？ i++是原子操作么？ atomic保障了什么？  CPU的寻址操作我们知道，CPU是通过地址总线寻址，然后通过数据总线存取数据的。 地址总线地址总线的位数决定CPU的寻址范围，若CPU的地址总线宽度是32位，那么CPU的寻址范围是4GB，所以最多支持4G内存。 数">
+<meta name="twitter:description" content="引言在继续深入之前一起来考虑几个问题：  64/32位操作系统，64/32指的是什么？ OC中标量类型属性修饰符为什么是assign？ i++是原子操作么？ atomic保障了什么？">
 
 
 
@@ -359,6 +359,7 @@
 <li>i++是原子操作么？</li>
 <li>atomic保障了什么？</li>
 </ul>
+<a id="more"></a>
 <h2 id="CPU的寻址操作"><a href="#CPU的寻址操作" class="headerlink" title="CPU的寻址操作"></a>CPU的寻址操作</h2><p>我们知道，CPU是通过地址总线寻址，然后通过数据总线存取数据的。</p>
 <h3 id="地址总线"><a href="#地址总线" class="headerlink" title="地址总线"></a>地址总线</h3><p>地址总线的位数决定CPU的寻址范围，若CPU的地址总线宽度是32位，那么CPU的寻址范围是4GB，所以最多支持4G内存。</p>
 <h3 id="数据总线"><a href="#数据总线" class="headerlink" title="数据总线"></a>数据总线</h3><p>数据总线的位数决定CPU单次通信能交换的信息数量。若数据总线宽度是32位，那么单次交换的信息量为4字节，64位的8字节。这也是为什么C语言中的指针64位下所占空间为8字节，32位下所占空间为4字节。</p>

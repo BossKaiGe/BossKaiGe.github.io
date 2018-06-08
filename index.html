@@ -354,89 +354,20 @@
 
       
         
-          
-            <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>在继续深入之前一起来考虑几个问题：</p>
+          <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>在继续深入之前一起来考虑几个问题：</p>
 <ul>
 <li>64/32位操作系统，64/32指的是什么？</li>
 <li>OC中标量类型属性修饰符为什么是assign？</li>
 <li>i++是原子操作么？</li>
 <li>atomic保障了什么？</li>
 </ul>
-<h2 id="CPU的寻址操作"><a href="#CPU的寻址操作" class="headerlink" title="CPU的寻址操作"></a>CPU的寻址操作</h2><p>我们知道，CPU是通过地址总线寻址，然后通过数据总线存取数据的。</p>
-<h3 id="地址总线"><a href="#地址总线" class="headerlink" title="地址总线"></a>地址总线</h3><p>地址总线的位数决定CPU的寻址范围，若CPU的地址总线宽度是32位，那么CPU的寻址范围是4GB，所以最多支持4G内存。</p>
-<h3 id="数据总线"><a href="#数据总线" class="headerlink" title="数据总线"></a>数据总线</h3><p>数据总线的位数决定CPU单次通信能交换的信息数量。若数据总线宽度是32位，那么单次交换的信息量为4字节，64位的8字节。这也是为什么C语言中的指针64位下所占空间为8字节，32位下所占空间为4字节。</p>
-<p>我们通常说的64位处理器/32位处理器指的是数据总线的宽度为64位/32位。</p>
-<h3 id="多线程下的寻址操作"><a href="#多线程下的寻址操作" class="headerlink" title="多线程下的寻址操作"></a>多线程下的寻址操作</h3><p>多线程下的内存管理是一个复杂的课题，在继续深入之前，关于CPU多线程下的寻址操作我们需要明确几点：</p>
-<ul>
-<li>地址总线、数据总线都只有一根，所以寻址是串行操作，不存在多个线程同时寻址同一个地址。</li>
-<li>64位下，对于标量类型int、double单次寻址就可以取出，对其存取我们可以理解为原子操作，是多线程安全的。</li>
-<li>32位下单次寻址只可取出4个字节，这种情况下double需要两次寻址才可取出。这种情况下不是线程安全的。</li>
-</ul>
-<h2 id="属性-amp-内存"><a href="#属性-amp-内存" class="headerlink" title="属性&amp;内存"></a>属性&amp;内存</h2><p>以下代码我们为一个SomeObj对象声明了若干属性，并在SomeObj的初始化方法内打印各个实例变量在内存中的地址：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">//属性声明</span><br><span class="line"></span><br><span class="line">@property(nonatomic,assign) int int_value;</span><br><span class="line">@property(nonatomic,assign) double double_value;</span><br><span class="line">@property(nonatomic,assign) Rect rect_value;</span><br><span class="line">@property(nonatomic,strong) id obj_Pointer;</span><br><span class="line">@property(nonatomic,assign) int int_value2;</span><br><span class="line"></span><br><span class="line">//init方法</span><br><span class="line">-(instancetype)init&#123;</span><br><span class="line">    self = [super init];</span><br><span class="line">    if (self) &#123;</span><br><span class="line">        NSLog(@&quot;address for int value:%p&quot;,&amp;_int_value);</span><br><span class="line">        NSLog(@&quot;address for int value2:%p&quot;,&amp;_int_value2);</span><br><span class="line">        NSLog(@&quot;address for double value:%p&quot;,&amp;_double_value);</span><br><span class="line">        NSLog(@&quot;address for rect value:%p&quot;,&amp;_rect_value);</span><br><span class="line">        NSLog(@&quot;address for pointer value:%p&quot;,&amp;_obj_Pointer);</span><br><span class="line">    &#125;</span><br><span class="line">    return self;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>我们调用init方法，打印各个实例变量的内存地址：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">2018-03-25 16:51:09.284092+0800 MemoryTest[22641:3042100] address for int value:0x600000241598</span><br><span class="line">2018-03-25 16:51:09.284201+0800 MemoryTest[22641:3042100] address for int value2:0x60000024159c</span><br><span class="line">2018-03-25 16:51:09.284286+0800 MemoryTest[22641:3042100] address for double value:0x6000002415a0</span><br><span class="line">2018-03-25 16:51:09.284363+0800 MemoryTest[22641:3042100] address for rect value:0x6000002415a8</span><br><span class="line">2018-03-25 16:51:09.284439+0800 MemoryTest[22641:3042100] address for pointer value:0x6000002415b0</span><br></pre></td></tr></table></figure>
-<p>可以看到，在初始化对象时编译器会在类的内存空间内自动分配实例变量的内存，这些内存会随着对象的销毁而释放。从这个角度看，指针类型和标量类型并没有区别（事实当然不是这样）。需要注意的是这里分配的是指针本身所占的8个字节而不是指针所指向的对象。</p>
-<p>我们可以将内存中存储的数据类型大致分为标量类型、指针的值、指针所指向的内存空间三类，接下来将围绕这三种情况进行展开，一些特殊类型如tagged pointer这里就不做讨论。</p>
-<h2 id="标量类型"><a href="#标量类型" class="headerlink" title="标量类型"></a>标量类型</h2><p>结合上面提到的，我们可以得出以下结论：</p>
-<ul>
-<li>由于CPU单次寻址就可取出标量类型，对于标量类型的存取操作天然是原子的、线程安全的。</li>
-<li>由于标量类型的存取操作天然是原子的，所以在未重写标量属性的getter/setter方法的情况下getter/setter方法也是原子的。</li>
-<li>标量类型的内存会随着类对象的销毁而释放，这也是为何对于标量类型的属性可以用assign修饰的原因。</li>
-</ul>
-<p>那么标量类型的数据在多线程下就高枕无忧了么？举个栗子，编程中最基本的操作之一是递增整数。这是一项非常普遍的任务，可以用几个等效的操作完成：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">_int_value = 3;</span><br><span class="line"></span><br><span class="line">//等效的三种方式</span><br><span class="line">_int_value++;</span><br><span class="line">_int_value+=1;</span><br><span class="line">_int_value = _int_value + 1;</span><br></pre></td></tr></table></figure>
-<p>然而，看起来像一个操作 - 递增整型变量 - 实际上包含三个不同的步骤:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Get _int_value (3)</span><br><span class="line">Perform Addition (3 + 1)</span><br><span class="line">Set _int_value (4)</span><br></pre></td></tr></table></figure>
-<p>单线程下get-add-set这些操作是可以保障顺序执行的。在多线程情况下，就有可能产生线程安全问题。最经典的例子就是火车站多窗口售票系统，在操作余票的时候通过加锁保障线程安全。</p>
-<h3 id="OSAtomic"><a href="#OSAtomic" class="headerlink" title="OSAtomic"></a>OSAtomic</h3><p>尽管，锁是同步两个线程的利器。不可否认的是，锁也是一种相对昂贵的操作。非阻塞性同步是解决多线程同步更优雅的方式。libkern/OSAtomic.h 提供了很多强大的多线程编程工具，虽然它是内核头文件的一部分，但它也可以用于内核和驱动程序编程之外。</p>
-<p>我们将上例中提到的“_int_value++”以Atomic Operations改写后，该操作就是原子的：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OSAtomicIncrement64(&amp;(_int_value));</span><br></pre></td></tr></table></figure>
-<p>事实上，真正的情况还要更复杂：为了提高性能，现代CPU/编译器会按照输入数据和执行单元的可用性的顺序执行指令而不是程序中的原始顺序执行（乱序执行）。</p>
-<h3 id="乱序执行-amp-内存屏障"><a href="#乱序执行-amp-内存屏障" class="headerlink" title="乱序执行 &amp; 内存屏障"></a>乱序执行 &amp; 内存屏障</h3><p>程序是工作在OS/编译器/物理硬件共同营造的虚拟环境中的。程序运行环境有一定的规则以确保程序稳定运行，不同的OS/编译器/CPU有各种不同的实现方式但是规则本身是不变的。</p>
-<p>编译器和CPU在满足前面的规则的时候，总是玩各种小九九，在满足前面”承诺“的规则的前提下，（非有意地）破坏没有承诺的规则。</p>
-<p>CPU：每个CPU都有自己的缓存，为提高数据读写速度，CPU会同自己的缓存交换数据而不是直接读写内存。<br>编译器：为充分利用寄存器和CPU流水线编译器可能会重排指令顺序。</p>
-<p>举个栗子</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">a=1;</span><br><span class="line">b=2;</span><br><span class="line">c=a+b;</span><br><span class="line">printf(&quot;a=%d, b=%d, c=%d\n&quot;, a, b, c);</span><br></pre></td></tr></table></figure>
-<p>上面这个程序序列，作用于程序运行环境的时候，环境规则能承诺的是计算c的时候，a肯定等于1，b肯定等于2。最后打印的时候，c肯定等于3。</p>
-<p>但它没有承诺的是：</p>
-<ul>
-<li>a，b，c是内存上的地址（也可以是寄存器一类的东西）</li>
-<li>a首先变成1，然后b才变成2</li>
-<li>如果其他设备或者CPU修改这些内存地址，反应是什么</li>
-<li>等等</li>
-</ul>
-<h3 id="内存屏障"><a href="#内存屏障" class="headerlink" title="内存屏障"></a>内存屏障</h3><p>我们可以通过设置内存屏障来避免CPU/编译器类似的优化，内存屏障可以有两个作用：</p>
-<ul>
-<li>阻止屏障两侧的指令重排。</li>
-<li>强制CPU直接读取内存（volatile）</li>
-</ul>
-<p>上述的libkern/OSAtomic.h同样提供了内存屏障版本的API：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OSAtomicIncrement64Barrier(&amp;(_int_value));</span><br></pre></td></tr></table></figure>
-<p>对于Objective C的实现来说，几乎所有的加锁操作最后都会设置memory barrier。官方文档表述如下：</p>
-<blockquote>
-<p>Note: Most types of locks also incorporate a memory barrier to ensure that any preceding load and store instructions are completed before entering the critical section.</p>
-</blockquote>
-<p>GCD也提供了对于内存屏障的支持，利用dispatch_barrier_async()，可以轻易的实现安全的可变数组、可变字典（读写锁）。</p>
-<h2 id="指针的值"><a href="#指针的值" class="headerlink" title="指针的值"></a>指针的值</h2><h3 id="C语言指针"><a href="#C语言指针" class="headerlink" title="C语言指针"></a>C语言指针</h3><p>以C语言来说，32位操作系统下指针的大小为4字节，64位操作下指针的大小为8字节。根据上面的理论，CPU单次寻址可以取出指针，所以指针的存取操作时原子的、线程安全的。</p>
-<h3 id="OC指针"><a href="#OC指针" class="headerlink" title="OC指针"></a>OC指针</h3><p>那么以OC为例呢？</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NSObject* obj = [[NSObject alloc] init];</span><br></pre></td></tr></table></figure>
-<p>事实上，答案是否定的，或者说从ARC的角度来看答案是否定的。仅仅从指针赋值的角度来看上述操作的确是原子的，但是为支持ARC上述赋值操作会调用在runtime中引入相应的副作用操作：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">void</span><br><span class="line">objc_storeStrong(id *location, id obj)</span><br><span class="line">&#123;</span><br><span class="line">    id prev = *location;</span><br><span class="line">    if (obj == prev) &#123;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line">    objc_retain(obj);</span><br><span class="line">    *location = obj;</span><br><span class="line">    objc_release(prev);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>考虑：A、B、C三个线程几乎同时对obj进行赋值操作，可能会有什么问题？可能会对同一“prev”调用多次objc_release(prev);从而导致Crash。一个比较类似的Crash是（可能不那么类似）：如果多个线程同时设置UIImageView的image，很可能应用程序会崩溃，因为当前设置的图像可能会被释放两次。</p>
-<p>同样的对于weak类型指针会调用相应的：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">id</span><br><span class="line">objc_storeWeak(id *location, id newObj)</span><br><span class="line">&#123;</span><br><span class="line">    return storeWeak&lt;DoHaveOld, DoHaveNew, DoCrashIfDeallocating&gt;</span><br><span class="line">        (location, (objc_object *)newObj);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="atomic"><a href="#atomic" class="headerlink" title="atomic"></a>atomic</h3><p>显然OC中ARC下的指针赋值操作是非原子的。而OC也提供了atomic关键字来保障属性getter/setter操作的“原子性”，调用getter/setter方法同样会调用到runtime的相应方法：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">static inline void reallySetProperty(id self, SEL _cmd, id newValue, ptrdiff_t offset, bool atomic, bool copy, bool mutableCopy)</span><br><span class="line">&#123;</span><br><span class="line">    if (offset == 0) &#123;</span><br><span class="line">        object_setClass(self, newValue);</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    id oldValue;</span><br><span class="line">    id *slot = (id*) ((char*)self + offset);</span><br><span class="line"></span><br><span class="line">    if (copy) &#123;</span><br><span class="line">        newValue = [newValue copyWithZone:nil];</span><br><span class="line">    &#125; else if (mutableCopy) &#123;</span><br><span class="line">        newValue = [newValue mutableCopyWithZone:nil];</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        if (*slot == newValue) return;</span><br><span class="line">        newValue = objc_retain(newValue);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (!atomic) &#123;</span><br><span class="line">        oldValue = *slot;</span><br><span class="line">        *slot = newValue;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        spinlock_t&amp; slotlock = PropertyLocks[slot];</span><br><span class="line">        slotlock.lock();</span><br><span class="line">        oldValue = *slot;</span><br><span class="line">        *slot = newValue;        </span><br><span class="line">        slotlock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    objc_release(oldValue);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>可以看到atomic 并没有真正保障getter/setter的原子性，而是通过加锁保障了不会对同一个oldValue 调用多次objc_release(oldValue);操作，从而保障了线程安全，同时也导致了性能的损耗。</p>
-<h2 id="内存地址"><a href="#内存地址" class="headerlink" title="内存地址"></a>内存地址</h2><p>那么，atomic是解决多线程内存管理问题的万能药么？答案是否定的。一起来看以下代码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">@property(atomic,strong)NSArray * array;  </span><br><span class="line"></span><br><span class="line">   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^&#123;</span><br><span class="line">       //Thread 1</span><br><span class="line">       for (int i = 0; i &lt; 10000; i ++) &#123;</span><br><span class="line">           if (i % 2) &#123;</span><br><span class="line">               self.array = @[@1,@2,@3];</span><br><span class="line">           &#125;else&#123;</span><br><span class="line">               self.array = @[@1];</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;);</span><br><span class="line"></span><br><span class="line">   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^&#123;</span><br><span class="line">       //Thread 2</span><br><span class="line">       for (int i = 0; i &lt; 10000; i ++) &#123;</span><br><span class="line">           if (self.array.count == 3) &#123;</span><br><span class="line">               NSLog(@&quot;obj At Inde 2:%@&quot;,[self.array objectAtIndex:2]);</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;);</span><br></pre></td></tr></table></figure>
-<p>即使我们将array的内存管理语义设为atomic，同时在访问objectAtIndex:之前加上判断，Thread 2还是会Crash。原因是由于前后两行代码之间array所指向的内存区域被线程1修改了。</p>
-<p>atomic通过加锁确保了对于属性setter、getter访问的线程安全问题。setter、getter操作的是属性的指针值，对于属性指针所指向的内存地址并不能起到保护作用。</p>
-<h2 id="More"><a href="#More" class="headerlink" title="More"></a>More</h2><p>多线程是一个复杂的课题，从pThread、NSThread、GCD、NSOperation，API的选择、优劣到多线程开发面临的挑战竞态条件、死锁、线程饥饿、优先级反转，再到如何编写性能优异安全的多线程代码。</p>
-<p>To be continue…</p>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/03/17/iOS多线程安全------多线程下的内存管理/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
