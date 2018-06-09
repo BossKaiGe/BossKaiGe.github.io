@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="算法设计,C," />
+  <meta name="keywords" content="性能调优," />
 
 
 
@@ -79,20 +79,22 @@
 
 
 
-<meta name="description" content="斐波那契数列 斐波那契数列又称黄金分割数列，这个数列从第三项开始，每一项都等于前两项之和。  递推公式F(0) = 1; F(1) = 1; F(n) = F(n-1) + F(n-1);">
-<meta name="keywords" content="算法设计,C">
+<meta name="description" content="Mach-O在Xcode中构建的程序，经由预处理、编译、汇编、链接将源文件（.m和.h文件）转变为Mach-O 二进制可执行文件。Mach-O 中代码被划分为不同的Segment，而每个Segment又包含多个Section。">
+<meta name="keywords" content="性能调优">
 <meta property="og:type" content="article">
-<meta property="og:title" content="算法设计------斐波那契数列">
-<meta property="og:url" content="https://bosskaige.github.io/2017/12/08/算法设计------斐波那契数列/index.html">
+<meta property="og:title" content="Work with compiler------premain启动优化">
+<meta property="og:url" content="https://bosskaige.github.io/2018/04/17/Work with compiler------premain启动优化/index.html">
 <meta property="og:site_name" content="Kai&#39;s Blog">
-<meta property="og:description" content="斐波那契数列 斐波那契数列又称黄金分割数列，这个数列从第三项开始，每一项都等于前两项之和。  递推公式F(0) = 1; F(1) = 1; F(n) = F(n-1) + F(n-1);">
+<meta property="og:description" content="Mach-O在Xcode中构建的程序，经由预处理、编译、汇编、链接将源文件（.m和.h文件）转变为Mach-O 二进制可执行文件。Mach-O 中代码被划分为不同的Segment，而每个Segment又包含多个Section。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://bosskaige.github.io/post_images/feibonaqi.png">
-<meta property="og:updated_time" content="2017-12-09T10:11:11.000Z">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/mach-o.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/section_text.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/section_data.png">
+<meta property="og:updated_time" content="2018-06-09T11:53:16.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="算法设计------斐波那契数列">
-<meta name="twitter:description" content="斐波那契数列 斐波那契数列又称黄金分割数列，这个数列从第三项开始，每一项都等于前两项之和。  递推公式F(0) = 1; F(1) = 1; F(n) = F(n-1) + F(n-1);">
-<meta name="twitter:image" content="https://bosskaige.github.io/post_images/feibonaqi.png">
+<meta name="twitter:title" content="Work with compiler------premain启动优化">
+<meta name="twitter:description" content="Mach-O在Xcode中构建的程序，经由预处理、编译、汇编、链接将源文件（.m和.h文件）转变为Mach-O 二进制可执行文件。Mach-O 中代码被划分为不同的Segment，而每个Segment又包含多个Section。">
+<meta name="twitter:image" content="https://bosskaige.github.io/post_images/mach-o.png">
 
 
 
@@ -122,13 +124,13 @@
 
 
 
-  <link rel="canonical" href="https://bosskaige.github.io/2017/12/08/算法设计------斐波那契数列/"/>
+  <link rel="canonical" href="https://bosskaige.github.io/2018/04/17/Work with compiler------premain启动优化/"/>
 
 
 
 
 
-  <title>算法设计------斐波那契数列 | Kai's Blog</title>
+  <title>Work with compiler------premain启动优化 | Kai's Blog</title>
   
 
 
@@ -265,7 +267,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://bosskaige.github.io/2017/12/08/算法设计------斐波那契数列/">
+    <link itemprop="mainEntityOfPage" href="https://bosskaige.github.io/2018/04/17/Work with compiler------premain启动优化/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="王凯">
@@ -282,7 +284,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">算法设计------斐波那契数列</h1>
+          <h1 class="post-title" itemprop="name headline">Work with compiler------premain启动优化</h1>
         
 
         <div class="post-meta">
@@ -294,8 +296,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-08T00:00:00+08:00">
-                2017-12-08
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-17T00:00:00+08:00">
+                2018-04-17
               </time>
             
 
@@ -317,8 +319,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/算法设计/" itemprop="url" rel="index">
-                    <span itemprop="name">算法设计</span>
+                  <a href="/categories/性能调优/" itemprop="url" rel="index">
+                    <span itemprop="name">性能调优</span>
                   </a>
                 </span>
 
@@ -354,21 +356,32 @@
       
 
       
-        <h2 id="斐波那契数列"><a href="#斐波那契数列" class="headerlink" title="斐波那契数列"></a>斐波那契数列</h2><blockquote>
-<p>斐波那契数列又称黄金分割数列，这个数列从第三项开始，每一项都等于前两项之和。</p>
-</blockquote>
-<h3 id="递推公式"><a href="#递推公式" class="headerlink" title="递推公式"></a>递推公式</h3><pre><code>F(0) = 1;
-F(1) = 1;
-F(n) = F(n-1) + F(n-1);
-</code></pre> <a id="more"></a>
-<h3 id="通项公式"><a href="#通项公式" class="headerlink" title="通项公式"></a>通项公式</h3><p><img src="/post_images/feibonaqi.png" alt=""></p>
-<h3 id="递推公式算法实现"><a href="#递推公式算法实现" class="headerlink" title="递推公式算法实现"></a>递推公式算法实现</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">int Fib( n )</span><br><span class="line">&#123;</span><br><span class="line">    if ( n == 1 || n == 2 ) return 1;</span><br><span class="line">    else return Fib(n-1) + Fib(n-2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h6 id="时间复杂度：O-2-n"><a href="#时间复杂度：O-2-n" class="headerlink" title="时间复杂度：O(2^n)"></a>时间复杂度：O(2^n)</h6><h3 id="动态规划算法实现"><a href="#动态规划算法实现" class="headerlink" title="动态规划算法实现"></a>动态规划算法实现</h3><p>递推公式计算Fib(n-1)时Fib(n-2)又被计算了一次，所以导致大量重复计算，为了避免重复计算，我们可以将之前计算出来的结果存储起来，这就是动态规划的思想了。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">int Fib( n )</span><br><span class="line">&#123;</span><br><span class="line">    int F[ MAXSIZE ];</span><br><span class="line">    F[ 1 ] = F[ 2 ] = 1;</span><br><span class="line">    for ( int i = 3 ; i &lt;= n ; ++ i )</span><br><span class="line">        F[ i ] = F[ i-2 ] + F[ i-1 ];</span><br><span class="line">    return F[ n ];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h6 id="时间复杂度：O-n"><a href="#时间复杂度：O-n" class="headerlink" title="时间复杂度：O(n)"></a>时间复杂度：O(n)</h6><h3 id="通项公式算法实现"><a href="#通项公式算法实现" class="headerlink" title="通项公式算法实现"></a>通项公式算法实现</h3><p>通项公式方式实现，其实回到了快速幂的计算方法</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">double pow (double a, int n)&#123;</span><br><span class="line"> 	if (n == 0) return 1;</span><br><span class="line">    if (n == 1) return n;</span><br><span class="line">    double t = pow(a, n/2);</span><br><span class="line">    return t * t * pow(a, n%2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h6 id="时间复杂度：O-㏒-n"><a href="#时间复杂度：O-㏒-n" class="headerlink" title="时间复杂度：O(㏒ n)"></a>时间复杂度：O(㏒ n)</h6><h3 id="相关链接"><a href="#相关链接" class="headerlink" title="相关链接"></a>相关链接</h3><p><a href="https://www.zhihu.com/question/25217301" target="_blank" rel="noopener">斐波那契数列通项公式是怎样推导出来的？</a></p>
-<p>如果对你有帮助的话，Star✨下一吧！</p>
+        <h2 id="Mach-O"><a href="#Mach-O" class="headerlink" title="Mach-O"></a>Mach-O</h2><p>在Xcode中构建的程序，经由预处理、编译、汇编、链接将源文件（.m和.h文件）转变为Mach-O 二进制可执行文件。Mach-O 中代码被划分为不同的Segment，而每个Segment又包含多个Section。</p>
+<a id="more"></a>
+<p>Mach-O的架构：</p>
+<p><img src="/post_images/mach-o.png" style="zoom:100%"> </p>
+<h3 id="Segment"><a href="#Segment" class="headerlink" title="Segment"></a>Segment</h3><p>执行一个可执行文件时。虚拟内存系统会将Segment映射到进程的地址空间。在虚拟内存系统进行映射时，不同的Segment会以不同的参数（权限）被映射。常见的Segment有：  </p>
+<ul>
+<li>__TEXT ：__TEXT段包含了可执行的代码。它们被以只读和可执行的方式映射。进程被允许执行这些代码，但是不能修改。</li>
+<li>__DATA：程序数据段以可读写但不可执行的方式映射。（本文讨论的重点）。</li>
+<li>__PAGEZERO:　空指针陷阱段，映射到虚拟内存空间的第一页，用于捕捉对 NULL 指针的引用。</li>
+<li>__LINKEDIT:　链接器使用的符号以及其他表。</li>
+</ul>
+<h3 id="Section"><a href="#Section" class="headerlink" title="Section"></a>Section</h3><p>Section 是具体有用的数据存放的地方，下表列出了__DATA 和 __TEXT下的Section：  </p>
+<p><img src="/post_images/section_text.png" style="zoom:100%"><br><img src="/post_images/section_data.png" style="zoom:100%">   </p>
+<h2 id="attribute"><a href="#attribute" class="headerlink" title="__attribute__"></a>__attribute__</h2><p>__attribute__是一种编译器指令，可以让编译器做更多地错误检查和代码优化，其中就包括大家常见的废弃掉方法、类或者变量的指令__attribute__ ((deprecated(“”)))。  </p>
+<p>__attribute__的一般语法形式是__attribute__关键字后面跟两个小括号，在小括号里是逗号分隔的选项。这里我们重点关注<a href="https://clang.llvm.org/docs/AttributeReference.html#section-gnu-section-declspec-allocate" target="_blank" rel="noopener">section() 函数</a>。</p>
+<h3 id="section-函数"><a href="#section-函数" class="headerlink" title="section() 函数"></a>section() 函数</h3><p>前面提到__DATA段为可读写程序数据段，而section() 函数提供了二进制段的读写能力，它可以将一些编译期就可以确定的常量写入数据段。在阅读runtime源码的过程中，可以发现苹果大量利用__attribute__和section()函数在编译器将数据写入__DATA段。</p>
+<p>比如，下述代码编译器在__DATA段下的objc_catlist section里保存了一个大小为1的category_t的数组，用于运行期category的加载：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">static struct _category_t *L_OBJC_LABEL_CATEGORY_$ [1] __attribute__((used, section (&quot;__DATA, __objc_catlist,regular,no_dead_strip&quot;)))= &#123;</span><br><span class="line">&amp;_OBJC_$_CATEGORY_MyClass_$_MyAddition,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>同样，我们也可以利用__attribute__和section()将数据提前写入__DATA段，以达到程序优化的目的（比如，去+load）。+load()提供了一个非常靠前的执行时机，在实际开发中很多基础库的初始化工作都集中在这个时机执行。而过重的+load()会拖慢程序的premain的加载时间，有了上述的理论基础我们可以在将相关初始化工作封装在函数内并在编译期将相关函数指针写入__DATA段，从而达到延迟加载的效果，节省启动时间。</p>
+<h2 id="Coding"><a href="#Coding" class="headerlink" title="Coding"></a>Coding</h2><p>受够了理论基础，是时候敲一段代码了~ ，以下代码我们在__DATA段新增section __bwkcfunction__，并将func()的函数指针写入__bwkcfunction__中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">typedef void (* BWKCFunction) (void);</span><br><span class="line"></span><br><span class="line">void func (void)&#123;</span><br><span class="line">    printf(&quot;hello world in c fun&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void  main ()&#123;</span><br><span class="line">    __attribute__((used,section(&quot;__DATA&quot;&quot;,&quot;&quot;__bwkcfunction__&quot;))) static const BWKCFunction cfunc = func;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接着，我们通过命令行编译该代码生成可执行文件a.out（a.out 是clang的默认命名）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xcrun clang test_attribute.c</span><br></pre></td></tr></table></figure>
+<p>最后通过命令行看一下我们的成果吧~</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">$ xcrun size -x -l -m a.out </span><br><span class="line"></span><br><span class="line">Segment __PAGEZERO: 0x100000000 (vmaddr 0x0 fileoff 0)</span><br><span class="line">Segment __TEXT: 0x1000 (vmaddr 0x100000000 fileoff 0)</span><br><span class="line">    Section __text: 0x26 (addr 0x100000f50 offset 3920)</span><br><span class="line">    Section __stubs: 0x6 (addr 0x100000f76 offset 3958)</span><br><span class="line">    Section __stub_helper: 0x1a (addr 0x100000f7c offset 3964)</span><br><span class="line">    Section __cstring: 0x16 (addr 0x100000f96 offset 3990)</span><br><span class="line">    Section __unwind_info: 0x48 (addr 0x100000fac offset 4012)</span><br><span class="line">total 0xa4</span><br><span class="line">Segment __DATA: 0x1000 (vmaddr 0x100001000 fileoff 4096)</span><br><span class="line">    Section __nl_symbol_ptr: 0x10 (addr 0x100001000 offset 4096)</span><br><span class="line">    Section __la_symbol_ptr: 0x8 (addr 0x100001010 offset 4112)</span><br><span class="line">    Section __bwkcfunction__: 0x8 (addr 0x100001018 offset 4120)</span><br><span class="line">total 0x20</span><br><span class="line">Segment __LINKEDIT: 0x1000 (vmaddr 0x100002000 fileoff 8192)</span><br><span class="line">total 0x100003000</span><br></pre></td></tr></table></figure>
+<p>可以看到，在_<em>DATA段，我们成功插入了\</em>_bwkcfunction__ section，且该section的大小为8字节（一个c语言指针的大小）。然后我们就可以在程序运行的过程中在需要的时候取出对应的函数指针，从而实现懒加载~</p>
 
       
     </div>
@@ -386,9 +399,7 @@ F(n) = F(n-1) + F(n-1);
       
         <div class="post-tags">
           
-            <a href="/tags/算法设计/" rel="tag"># 算法设计</a>
-          
-            <a href="/tags/C/" rel="tag"># C</a>
+            <a href="/tags/性能调优/" rel="tag"># 性能调优</a>
           
         </div>
       
@@ -401,8 +412,8 @@ F(n) = F(n-1) + F(n-1);
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/12/08/算法设计------栈实现/" rel="next" title="算法设计------栈实现">
-                <i class="fa fa-chevron-left"></i> 算法设计------栈实现
+              <a href="/2018/03/17/iOS多线程安全------多线程下的内存管理/" rel="next" title="iOS多线程安全------多线程下的内存管理">
+                <i class="fa fa-chevron-left"></i> iOS多线程安全------多线程下的内存管理
               </a>
             
           </div>
@@ -410,10 +421,6 @@ F(n) = F(n-1) + F(n-1);
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/12/09/设计模式------策略模式/" rel="prev" title="设计模式------策略模式">
-                设计模式------策略模式 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -571,7 +578,7 @@ F(n) = F(n-1) + F(n-1);
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#斐波那契数列"><span class="nav-number">1.</span> <span class="nav-text">斐波那契数列</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#递推公式"><span class="nav-number">1.1.</span> <span class="nav-text">递推公式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通项公式"><span class="nav-number">1.2.</span> <span class="nav-text">通项公式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#递推公式算法实现"><span class="nav-number">1.3.</span> <span class="nav-text">递推公式算法实现</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#时间复杂度：O-2-n"><span class="nav-number">1.3.0.0.1.</span> <span class="nav-text">时间复杂度：O(2^n)</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#动态规划算法实现"><span class="nav-number">1.4.</span> <span class="nav-text">动态规划算法实现</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#时间复杂度：O-n"><span class="nav-number">1.4.0.0.1.</span> <span class="nav-text">时间复杂度：O(n)</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通项公式算法实现"><span class="nav-number">1.5.</span> <span class="nav-text">通项公式算法实现</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#时间复杂度：O-㏒-n"><span class="nav-number">1.5.0.0.1.</span> <span class="nav-text">时间复杂度：O(㏒ n)</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#相关链接"><span class="nav-number">1.6.</span> <span class="nav-text">相关链接</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Mach-O"><span class="nav-number">1.</span> <span class="nav-text">Mach-O</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Segment"><span class="nav-number">1.1.</span> <span class="nav-text">Segment</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Section"><span class="nav-number">1.2.</span> <span class="nav-text">Section</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#attribute"><span class="nav-number">2.</span> <span class="nav-text">__attribute__</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#section-函数"><span class="nav-number">2.1.</span> <span class="nav-text">section() 函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Coding"><span class="nav-number">3.</span> <span class="nav-text">Coding</span></a></li></ol></div>
             
 
           </div>
