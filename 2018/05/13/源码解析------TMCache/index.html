@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="源码解析," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引言本文为阅读TMCache源码后所产，TMCache由著名网站tumblr开发虽然目前已停止维护，源码中还是有很多值得借鉴的点。客户端缓存从硬件介质上来看，无非就是内存和磁盘两种。在TMCache中分别对应TMMemoryCache（内存级别缓存）、TMDiskCache（磁盘级别缓存）。通常来讲磁盘缓存由于涉及磁盘">
+<meta name="keywords" content="源码解析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="源码解析------TMCache">
+<meta property="og:url" content="https://bosskaige.github.io/2018/05/13/源码解析------TMCache/index.html">
+<meta property="og:site_name" content="Kai&#39;s Blog">
+<meta property="og:description" content="引言本文为阅读TMCache源码后所产，TMCache由著名网站tumblr开发虽然目前已停止维护，源码中还是有很多值得借鉴的点。客户端缓存从硬件介质上来看，无非就是内存和磁盘两种。在TMCache中分别对应TMMemoryCache（内存级别缓存）、TMDiskCache（磁盘级别缓存）。通常来讲磁盘缓存由于涉及磁盘IO、文件编解码较内存缓存而言会更复杂一些。本文中笔者将循着TMCache的实现">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/barrier_async.png">
+<meta property="og:image" content="https://bosskaige.github.io/post_images/thread_baozha.png">
+<meta property="og:updated_time" content="2018-06-13T11:38:23.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="源码解析------TMCache">
+<meta name="twitter:description" content="引言本文为阅读TMCache源码后所产，TMCache由著名网站tumblr开发虽然目前已停止维护，源码中还是有很多值得借鉴的点。客户端缓存从硬件介质上来看，无非就是内存和磁盘两种。在TMCache中分别对应TMMemoryCache（内存级别缓存）、TMDiskCache（磁盘级别缓存）。通常来讲磁盘缓存由于涉及磁盘IO、文件编解码较内存缓存而言会更复杂一些。本文中笔者将循着TMCache的实现">
+<meta name="twitter:image" content="https://bosskaige.github.io/post_images/barrier_async.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://bosskaige.github.io/2018/05/13/源码解析------TMCache/"/>
+
+
+
+
+
+  <title>源码解析------TMCache | Kai's Blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Kai's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://bosskaige.github.io/2018/05/13/源码解析------TMCache/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="王凯">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kai's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">源码解析------TMCache</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-13T00:00:00+08:00">
+                2018-05-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/源码解析/" itemprop="url" rel="index">
+                    <span itemprop="name">源码解析</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>本文为阅读TMCache源码后所产，TMCache由著名网站tumblr开发虽然目前已停止维护，源码中还是有很多值得借鉴的点。客户端缓存从硬件介质上来看，无非就是内存和磁盘两种。在TMCache中分别对应TMMemoryCache（内存级别缓存）、TMDiskCache（磁盘级别缓存）。通常来讲磁盘缓存由于涉及磁盘IO、文件编解码较内存缓存而言会更复杂一些。本文中笔者将循着TMCache的实现分析TMMemoryCache、TMDiskCache源码中一些平时开发中值得借鉴的点(红榜)及一些需要避免的点（黑榜）。</p>
+<a id="more"></a>
+<p>PS：为方便阅读、聚焦本文讨论的key点，本文中对所引入的TMCache源码进行不同程度的精简。</p>
+<h2 id="TMMemoryCache"><a href="#TMMemoryCache" class="headerlink" title="TMMemoryCache"></a>TMMemoryCache</h2><p>TMMemoryCache提供了线程安全的同步/异步读写内存的API。对于内存缓存而言并行读、串行写是刚需（即读写锁），TMMemoryCache对于读写线程安全访问控制及异步转同步的实现值得借鉴。</p>
+<h3 id="TMMemoryCache红榜之读写锁实现"><a href="#TMMemoryCache红榜之读写锁实现" class="headerlink" title="TMMemoryCache红榜之读写锁实现"></a>TMMemoryCache红榜之读写锁实现</h3><p>TMMemoryCache通过GCD并发队列及 <a href="https://developer.apple.com/documentation/dispatch/1452797-dispatch_barrier_async" target="_blank" rel="noopener">dispatch_barrier_async()</a>实现并发读、串行写的线程安全访问。</p>
+<h4 id="dispatch-barrier-async"><a href="#dispatch-barrier-async" class="headerlink" title="dispatch_barrier_async"></a>dispatch_barrier_async</h4><p>一个比较关键的概念是：dispatch_barrier_async(),dispatch_barrier_async()是GCD提供的类似“内存屏障”的“队列屏障”。dispatch_barrier_async()在GCD并发队列的任务调度中起到一个栅栏的作用，dispatch_barrier_async()提交到队列里的任务会等待之前的任务执行完毕，再开始执行。且dispatch_barrier_async()提交到队列里的任务执行完毕后才会执行之后之后提交到队列里的任务。一图以蔽之：</p>
+<p><img src="/post_images/barrier_async.png" style="zoom:100%"> </p>
+<p>TMMemoryCache中读写操作都是在一个 concurrent queue(并发队列)中, 通过 dispatch_barrier_async() 保障在同一时间只有一个写任务在执行, 其它读写操作都处于等待状态, 这是 TMMemoryCache 保证线程安全的核心。</p>
+<h4 id="部分源码"><a href="#部分源码" class="headerlink" title="部分源码"></a>部分源码</h4><p>一起来看一下简化后的源码：</p>
+<h5 id="读操作"><a href="#读操作" class="headerlink" title="读操作"></a>读操作</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">- (void)objectForKey:(NSString *)key block:(TMMemoryCacheObjectBlock)block</span><br><span class="line">&#123;</span><br><span class="line">    __weak TMMemoryCache *weakSelf = self;</span><br><span class="line">    dispatch_async(_queue, ^&#123;</span><br><span class="line">        TMMemoryCache *strongSelf = weakSelf;</span><br><span class="line">        if (!strongSelf)</span><br><span class="line">            return;</span><br><span class="line"></span><br><span class="line">        id object = [strongSelf-&gt;_dictionary objectForKey:key];</span><br><span class="line"></span><br><span class="line">        block(strongSelf, key, object);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="写操作"><a href="#写操作" class="headerlink" title="写操作"></a>写操作</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">- (void)setObject:(id)object forKey:(NSString *)key withCost:(NSUInteger)cost block:(TMMemoryCacheObjectBlock)block</span><br><span class="line">&#123;</span><br><span class="line">    __weak TMMemoryCache *weakSelf = self;</span><br><span class="line"></span><br><span class="line">    dispatch_barrier_async(_queue, ^&#123;</span><br><span class="line"></span><br><span class="line">        TMMemoryCache *strongSelf = weakSelf;</span><br><span class="line">        if (!strongSelf)</span><br><span class="line">            return;</span><br><span class="line"></span><br><span class="line">        [strongSelf-&gt;_dictionary setObject:object forKey:key];</span><br><span class="line"></span><br><span class="line">        if (block) &#123;</span><br><span class="line">            __weak TMMemoryCache *weakSelf = strongSelf;</span><br><span class="line">            dispatch_async(strongSelf-&gt;_queue, ^&#123;</span><br><span class="line">                TMMemoryCache *strongSelf = weakSelf;</span><br><span class="line">                if (strongSelf)</span><br><span class="line">                    block(strongSelf, key, object);</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="TMMemoryCache红榜之异步转同步实现"><a href="#TMMemoryCache红榜之异步转同步实现" class="headerlink" title="TMMemoryCache红榜之异步转同步实现"></a>TMMemoryCache红榜之异步转同步实现</h3><p>TMMemoryCache的同步方法是通过在调用异步方法的过程中插入dispatch_semaphore_t信号量实现的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">- (void)setObject:(id)object forKey:(NSString *)key withCost:(NSUInteger)cost</span><br><span class="line">&#123;</span><br><span class="line">    if (!object || !key)</span><br><span class="line">        return;</span><br><span class="line"></span><br><span class="line">    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);</span><br><span class="line"></span><br><span class="line">    [self setObject:object forKey:key withCost:cost block:^(TMMemoryCache *cache, NSString *key, id object) &#123;</span><br><span class="line">        dispatch_semaphore_signal(semaphore);</span><br><span class="line">    &#125;];</span><br><span class="line"></span><br><span class="line">    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);</span><br><span class="line"></span><br><span class="line">    #if !OS_OBJECT_USE_OBJC</span><br><span class="line">    dispatch_release(semaphore);</span><br><span class="line">    #endif</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>###TMMemoryCache黑榜之线程爆炸</p>
+<p>在实际使用过程中，通过GCD Barrier来保证读写同步在一定程度上是可行的，但在并发量很大的情况，会造成线程爆炸，严重情况下会因为线程资源消耗而导致死锁。一起来看一个例子，我们通过以下代码来模拟通过TMMemoryCache高并发下读写缓存的case：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">#define TIMES 1000000</span><br><span class="line"></span><br><span class="line">dispatch_queue_t testQueue = dispatch_queue_create([@&quot;com.tmcache.test&quot; UTF8String], DISPATCH_QUEUE_CONCURRENT);</span><br><span class="line"></span><br><span class="line">for (NSInteger index = 0; index &lt; TIMES; ++index) &#123;</span><br><span class="line">    if (index % 10 == 9) &#123;</span><br><span class="line">        dispatch_async(testQueue, ^&#123;</span><br><span class="line">            [[TMMemoryCache sharedCache] setObject:@(index) forKey:[@(index) stringValue] block:^(TMMemoryCache *cache, NSString *key, id object) &#123;</span><br><span class="line">            &#125;];</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    else&#123;</span><br><span class="line">        dispatch_async(testQueue, ^&#123;</span><br><span class="line">            [[TMMemoryCache sharedCache] objectForKey:[@(index) stringValue]];</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过断点看一下执行过程中的线程状况：</p>
+<p><img src="/post_images/thread_baozha.png" style="zoom:100%"> </p>
+<p>其实在当前case下已经产生死锁了。</p>
+<p>这是由于GCD的特性导致的。GCD创建了一个大致与内核数量相匹配的线程池，如果我们向GCD提交了一个任务，并且该任务阻塞了该线程。为了弥补线程被阻塞的损失，GCD会创建一个新的线程并将其添加到线程池中，这就是线程爆炸的根本原因。同时，由于线程并不是免费资源，每一个线程都需要固定的内存（用于存储线程局部信息函数调用栈等）和内核（用于线程调度）资源，大量分配线程会导致内核资源耗尽导致死锁。</p>
+<p>这也是平时开发中需要注意的点：对于高并发下的读写操作应避免使用GCD Barrier，可以通过封装NSLock实现一个自定义的读写锁。</p>
+<h2 id="TMDiskCache"><a href="#TMDiskCache" class="headerlink" title="TMDiskCache"></a>TMDiskCache</h2><p>TMDiskCache的实现形式是基于文件读写的。TMDiskCache同样提供了线程安全的同步/异步读写磁盘的API。其异步转同步思路与TMMemoryCache一致这里不再赘述。关于TMDiskCache我们关注的重点不再是线程安全（TMDiskCache所有的读写操作都在一个 serial queue 串行队列中, 不存在竞态情况,），而作者根据磁盘缓存的特性对于API的选择很有借鉴意义。</p>
+<h3 id="TMDiskCache红榜之serial-queue"><a href="#TMDiskCache红榜之serial-queue" class="headerlink" title="TMDiskCache红榜之serial queue"></a>TMDiskCache红榜之serial queue</h3><p>不同于TMMemoryCache，TMCache的作者将TMDiskCache的读写操作放在了一个 serial queue。这是由于磁盘存取的速度瓶颈在磁盘IO上，和是否多线程存取没有太大关系。磁盘IO是一个很复杂的课题，这里只列出几点关于TMCache作者选用serial queue的猜想，不做展开讨论。</p>
+<h4 id="磁盘IO调度层本身就是串行"><a href="#磁盘IO调度层本身就是串行" class="headerlink" title="磁盘IO调度层本身就是串行"></a>磁盘IO调度层本身就是串行</h4><p>调用上层API产生的磁盘IO请求会被放到IO调度层，在IO调度层会缓存请求并试图合并请求，最终内核根据设置好的调度算法，回调驱动层提供的请求处理函数，以处理具体的I/O请求。而磁盘I/O调度层本身的调度策略就是串行的，这主要是由于目前计算机体系结构下磁盘是不支持多磁头同时读写的。</p>
+<h4 id="磁盘Cache层提供了足够的优化"><a href="#磁盘Cache层提供了足够的优化" class="headerlink" title="磁盘Cache层提供了足够的优化"></a>磁盘Cache层提供了足够的优化</h4><p>磁盘Cache层在内存中缓存了磁盘上的部分数据。当数据请求到达时，如果Cache存在数据且是最新的，则将数据传递给用户程序，免除了对底层磁盘的操作，提高了性能。</p>
+<p>磁盘Cache有两大功能：预读和回写。</p>
+<h5 id="预读"><a href="#预读" class="headerlink" title="预读"></a>预读</h5><p>预读其实就是利用了局部性原理，具体过程是：对于每个文件的第一个读请求，系统读入所请求的页面并读入紧随其后的少数几个页面（通常是三个页面），这时的预读称为同步预读。对于第二次读请求，如果所读页面不在Cache中，即不在前次预读的页中，则表明文件访问不是顺序访问，系统继续采用同步预读；如果所读页面在Cache中，则表明前次预读命中，操作系统把预读页的大小扩大一倍，此时预读过程是异步的，应用程序可以不等预读完成即可返回，只要后台慢慢读页面即可，这时的预读称为异步预读。任何接下来的读请求都会处于两种情况之一：第一种情况是所请求的页面处于预读的页面中，这时继续进行异步预读；第二种情况是所请求的页面处于预读页面之外，这时系统就要进行同步预读。</p>
+<h5 id="回写"><a href="#回写" class="headerlink" title="回写"></a>回写</h5><p>回写是通过暂时将数据存在Cache里，然后统一异步写到磁盘中。通过这种异步的数据I/O模式解决了程序中的计算速度和数据存储速度不匹配的鸿沟，减少了访问底层存储介质的次数，使存储系统的性能大大提高。</p>
+<h4 id="多线程下的磁盘I-0"><a href="#多线程下的磁盘I-0" class="headerlink" title="多线程下的磁盘I/0"></a>多线程下的磁盘I/0</h4><p>有了这些基础我们再来分别看一下多个线程调用读和写分别会发生什么。</p>
+<h5 id="多个线程同时读"><a href="#多个线程同时读" class="headerlink" title="多个线程同时读"></a>多个线程同时读</h5><p>在未命中磁盘Cache的情况下，会提交多个I/O任务到磁盘I/O调度层。可能依靠IO调度层本身的调度算法及对于同一文件I/O请求的合并带来效率上的些许提升。但是比起CPU消耗及多个线程上下文切换其意义并不是很大。而且对于同一文件I/O请求在串行发起多次的情况下，除第一次I/O请求会读磁盘外其余都会命中磁盘Cache，所以I/O调度层对于同一文件I/O请求的合并不会带来实际的意义。</p>
+<h5 id="多个线程同时写"><a href="#多个线程同时写" class="headerlink" title="多个线程同时写"></a>多个线程同时写</h5><p>根据磁盘Cache的回写功能，不难看出多线程同时写只是更快的填满了写缓冲区，并不会带来实际意义上的效率提升。</p>
+<h3 id="TMDiskCache红榜之文件删除"><a href="#TMDiskCache红榜之文件删除" class="headerlink" title="TMDiskCache红榜之文件删除"></a>TMDiskCache红榜之文件删除</h3><p>关于文件删除TMDiskCache的实现方案是将待删除文件移至tmp文件夹，然后将具体的删除任务丢到优先级最低的DISPATCH_QUEUE_PRIORITY_BACKGROUND去做。这样只有在程序真正空闲时才会处理具体删除操作。如果程序最终都没有处理删除操作在程序，在程序结束后系统会自动删除tmp文件夹内的文件。一起来看一下相关源码吧：</p>
+<h4 id="文件删除源码"><a href="#文件删除源码" class="headerlink" title="文件删除源码"></a>文件删除源码</h4><p> 共享的文件删除队列（DISPATCH_QUEUE_PRIORITY_BACKGROUND优先级）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">+ (dispatch_queue_t)sharedTrashQueue</span><br><span class="line">&#123;</span><br><span class="line">    static dispatch_queue_t trashQueue;</span><br><span class="line">    static dispatch_once_t predicate;</span><br><span class="line">    </span><br><span class="line">    dispatch_once(&amp;predicate, ^&#123;</span><br><span class="line">        NSString *queueName = [[NSString alloc] initWithFormat:@&quot;%@.trash&quot;, TMDiskCachePrefix];</span><br><span class="line">        trashQueue = dispatch_queue_create([queueName UTF8String], DISPATCH_QUEUE_SERIAL);</span><br><span class="line">        dispatch_set_target_queue(trashQueue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0));</span><br><span class="line">    &#125;);</span><br><span class="line">    </span><br><span class="line">    return trashQueue;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>共享的存放删除文件的tmp文件夹</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">+ (NSURL *)sharedTrashURL</span><br><span class="line">&#123;</span><br><span class="line">    static NSURL *sharedTrashURL;</span><br><span class="line">    static dispatch_once_t predicate;</span><br><span class="line">    </span><br><span class="line">    dispatch_once(&amp;predicate, ^&#123;</span><br><span class="line">        //临时文件夹</span><br><span class="line">        sharedTrashURL = [[[NSURL alloc] initFileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:TMDiskCachePrefix isDirectory:YES];</span><br><span class="line">        </span><br><span class="line">        if (![[NSFileManager defaultManager] fileExistsAtPath:[sharedTrashURL path]]) &#123;</span><br><span class="line">            NSError *error = nil;</span><br><span class="line">            [[NSFileManager defaultManager] createDirectoryAtURL:sharedTrashURL</span><br><span class="line">                                     withIntermediateDirectories:YES</span><br><span class="line">                                                      attributes:nil</span><br><span class="line">                                                           error:&amp;error];</span><br><span class="line">            TMDiskCacheError(error);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    </span><br><span class="line">    return sharedTrashURL;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>待删除文件移动至tmp文件夹，这里另外一个点是通过调用[[NSProcessInfo processInfo] globallyUniqueString]生成了一个临时文件名，该方法会确保每次“调用”会不一样，所以不会产生相同的文件名。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">+(BOOL)moveItemAtURLToTrash:(NSURL *)itemURL</span><br><span class="line">&#123;</span><br><span class="line">    if (![[NSFileManager defaultManager] fileExistsAtPath:[itemURL path]])</span><br><span class="line">        return NO;</span><br><span class="line">    </span><br><span class="line">    NSError *error = nil;</span><br><span class="line">    NSString *uniqueString = [[NSProcessInfo processInfo] globallyUniqueString]; //每次&quot;调用&quot;会不一样，可以用作一些临时缓存文件的名字</span><br><span class="line">    NSURL *uniqueTrashURL = [[TMDiskCache sharedTrashURL] URLByAppendingPathComponent:uniqueString];</span><br><span class="line">    BOOL moved = [[NSFileManager defaultManager] moveItemAtURL:itemURL toURL:uniqueTrashURL error:&amp;error];</span><br><span class="line">    TMDiskCacheError(error);</span><br><span class="line">    return moved;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>清空操作，遍历并删除tmp文件夹下所有文件，该任务被丢到DISPATCH_QUEUE_PRIORITY_BACKGROUND优先级队列中执行。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">+ (void)emptyTrash</span><br><span class="line">&#123;</span><br><span class="line">    UIBackgroundTaskIdentifier taskID = [TMCacheBackgroundTaskManager beginBackgroundTask];</span><br><span class="line">    </span><br><span class="line">    dispatch_async([self sharedTrashQueue], ^&#123;        </span><br><span class="line">        NSError *error = nil;</span><br><span class="line">        NSArray *trashedItems = [[NSFileManager defaultManager] contentsOfDirectoryAtURL:[self sharedTrashURL]</span><br><span class="line">                                                              includingPropertiesForKeys:nil</span><br><span class="line">                                                                                 options:0</span><br><span class="line">                                                                                   error:&amp;error];</span><br><span class="line">        TMDiskCacheError(error);</span><br><span class="line"></span><br><span class="line">        for (NSURL *trashedItemURL in trashedItems) &#123;</span><br><span class="line">            NSError *error = nil;</span><br><span class="line">            [[NSFileManager defaultManager] removeItemAtURL:trashedItemURL error:&amp;error];</span><br><span class="line">            TMDiskCacheError(error);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        [TMCacheBackgroundTaskManager endBackgroundTask:taskID];</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="TMDiskCache黑榜之不当API使用"><a href="#TMDiskCache黑榜之不当API使用" class="headerlink" title="TMDiskCache黑榜之不当API使用"></a>TMDiskCache黑榜之不当API使用</h3><p>一起来看TMDiskCache中以下代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">- (void)setAgeLimit:(NSTimeInterval)ageLimit</span><br><span class="line">&#123;</span><br><span class="line">    __weak TMDiskCache *weakSelf = self;</span><br><span class="line">    </span><br><span class="line">    dispatch_barrier_async(_queue, ^&#123;</span><br><span class="line">        TMDiskCache *strongSelf = weakSelf;</span><br><span class="line">        if (!strongSelf)</span><br><span class="line">            return;</span><br><span class="line">        </span><br><span class="line">        strongSelf-&gt;_ageLimit = ageLimit;</span><br><span class="line">        </span><br><span class="line">        [strongSelf trimToAgeLimitRecursively];</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里注意两点：</p>
+<ol>
+<li>_queue 为串行队列</li>
+<li>使用了dispatch_barrier_async()栅栏函数</li>
+</ol>
+<p>所以上面的代码是在串行队列中使用了栅栏函数？？难道串行队列不是保障了任务按入队顺序依次执行且上一个执行完毕才会执行下一个？？关于<a href="https://developer.apple.com/documentation/dispatch/1452797-dispatch_barrier_async" target="_blank" rel="noopener">dispatch_barrier_async()</a>一起来看一下苹果爸爸怎么说：</p>
+<blockquote>
+<p>The queue you specify should be a concurrent queue that you create yourself using the dispatch_queue_create function. If the queue you pass to this function is a serial queue or one of the global concurrent queues, this function behaves like the dispatch_async function.</p>
+</blockquote>
+<p>如果我们传入非自定义队列或串行队列那使用dispatch_barrier_async()函数就等于是在用 dispatch_async()。滥用API有木有，虽然不会产生性能、质量上的影响但的确是一个槽点。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/源码解析/" rel="tag"># 源码解析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/19/性能调优------实现一个简单的卡顿监控demo/" rel="next" title="性能调优------卡顿监控">
+                <i class="fa fa-chevron-left"></i> 性能调优------卡顿监控
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="王凯" />
+            
+              <p class="site-author-name" itemprop="name">王凯</p>
+              <p class="site-description motion-element" itemprop="description">The shortest answer is doing!</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">29</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/BossKaiGe" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:angxian66@163.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://blog.csdn.net/uitguyrff" target="_blank" title="CSDN">
+                    
+                      <i class="fa fa-fw fa-instagram"></i>CSDN</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TMMemoryCache"><span class="nav-number">2.</span> <span class="nav-text">TMMemoryCache</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TMMemoryCache红榜之读写锁实现"><span class="nav-number">2.1.</span> <span class="nav-text">TMMemoryCache红榜之读写锁实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#dispatch-barrier-async"><span class="nav-number">2.1.1.</span> <span class="nav-text">dispatch_barrier_async</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#部分源码"><span class="nav-number">2.1.2.</span> <span class="nav-text">部分源码</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#读操作"><span class="nav-number">2.1.2.1.</span> <span class="nav-text">读操作</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#写操作"><span class="nav-number">2.1.2.2.</span> <span class="nav-text">写操作</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TMMemoryCache红榜之异步转同步实现"><span class="nav-number">2.2.</span> <span class="nav-text">TMMemoryCache红榜之异步转同步实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TMDiskCache"><span class="nav-number">3.</span> <span class="nav-text">TMDiskCache</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TMDiskCache红榜之serial-queue"><span class="nav-number">3.1.</span> <span class="nav-text">TMDiskCache红榜之serial queue</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#磁盘IO调度层本身就是串行"><span class="nav-number">3.1.1.</span> <span class="nav-text">磁盘IO调度层本身就是串行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#磁盘Cache层提供了足够的优化"><span class="nav-number">3.1.2.</span> <span class="nav-text">磁盘Cache层提供了足够的优化</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#预读"><span class="nav-number">3.1.2.1.</span> <span class="nav-text">预读</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#回写"><span class="nav-number">3.1.2.2.</span> <span class="nav-text">回写</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#多线程下的磁盘I-0"><span class="nav-number">3.1.3.</span> <span class="nav-text">多线程下的磁盘I/0</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#多个线程同时读"><span class="nav-number">3.1.3.1.</span> <span class="nav-text">多个线程同时读</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#多个线程同时写"><span class="nav-number">3.1.3.2.</span> <span class="nav-text">多个线程同时写</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TMDiskCache红榜之文件删除"><span class="nav-number">3.2.</span> <span class="nav-text">TMDiskCache红榜之文件删除</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#文件删除源码"><span class="nav-number">3.2.1.</span> <span class="nav-text">文件删除源码</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TMDiskCache黑榜之不当API使用"><span class="nav-number">3.3.</span> <span class="nav-text">TMDiskCache黑榜之不当API使用</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王凯</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
